@@ -41,3 +41,21 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+~$chitecture project.docx
+~WRL0005.tmp
+Arch/.classpath
+Arch/.project
+Arch/.settings/org.eclipse.jdt.core.prefs
+Arch/bin/Config.class
+Arch/bin/FileHandler.class
+Arch/bin/FpRegStatus.class
+Arch/bin/FpReserveRow.class
+Arch/bin/InstructionContainer.class
+Arch/bin/IntegerReserveRow.class
+Arch/bin/IntRegStatus.class
+Arch/bin/RobQueue.class
+Arch/bin/RobRow.class
+Arch/bin/sim.class
+Arch/bin/Trace.class
+Arch/bin/TraceRecord.class
+Arch/bin/Utils.class
