@@ -1,7 +1,6 @@
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class Utils {
 	
@@ -22,7 +21,7 @@ public class Utils {
 		public static LinkedList<InstructionContainer> 	InstructionQueue = new LinkedList<InstructionContainer>();
 		public static IntegerReserveRow[] 			IntReserveStation;
 		public static FpReserveRow[] 				FpAddReserveStation;
-		public public static FpReserveRow[] 		FpMulReserveStation;
+		public static FpReserveRow[] 		FpMulReserveStation;
 		public static HashMap<Integer,Integer> BTB = new HashMap<Integer,Integer>(16);
 		public static int[] 					MainMem = new int[1024]; 
 		public static boolean 					Halt = false ;

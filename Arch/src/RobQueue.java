@@ -16,7 +16,7 @@ public class RobQueue {
 		
 	}
 	
-	public void RobQueue( int queueSize ){
+	public RobQueue( int queueSize ){
 		// TODO: init queue;
 	}
 	
