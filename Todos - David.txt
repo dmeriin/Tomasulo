@@ -1,0 +1,4 @@
+1. When reading config file , ignoring names... needs to check and read every param name?
+2. writing float to text? anything to do about it? for example 789789.211111 will only save 789789.2. 
+	100000000 will be saves as 1.0E8
+

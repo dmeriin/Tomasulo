@@ -2,16 +2,22 @@ import java.util.ArrayList;
 
 
 public class Trace {
-	ArrayList<TraceRecord> records = new ArrayList<TraceRecord>();
-	int ID = 0;
+	public static ArrayList<TraceRecord> records = new ArrayList<TraceRecord>();
+	public static int ID = 0;
 	
-	int AddRecord( int instruction )
+	public static int AddRecord( int instruction )
 	{
-		return 0;
+		int assignedID = ID;
+		TraceRecord record = new TraceRecord(assignedID, instruction);
+		records.add(record);
+		
+		ID++;
+		
+		return assignedID ;
 	}
 	
-	TraceRecord GetRecord( int id )
+	public static TraceRecord GetRecord( int id )
 	{
-		return null;
+		return records.get(id);
 	}
 }
