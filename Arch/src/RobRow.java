@@ -8,6 +8,9 @@ public class RobRow {
 	boolean Ready;
 	
 	
+	/*public RobRow() {
+		this((byte)-1,-1,-1,null,false);
+	}*/
 	
 	public RobRow(byte opcode, int id, int destination, Object value,
 			boolean ready) {
