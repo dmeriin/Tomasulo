@@ -1,4 +1,3 @@
-1. When reading config file , ignoring names... needs to check and read every param name?
-2. writing float to text? anything to do about it? for example 789789.211111 will only save 789789.2. 
-	100000000 will be saves as 1.0E8
-
+1. Order of fetch/issue/etc... Make sure write for example doesn't do something when execute finished in that same cycle. 
+2. instruction container . taken/not taken?
+3. if unknown opcode is received, put in to rob. when commiting, check opcode type (use enum) and if not supported, halt and exit. It shouold be done in commit in case the opcode is not supported but it wouldn't be called anyway.
