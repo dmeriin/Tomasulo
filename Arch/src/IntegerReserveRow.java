@@ -14,7 +14,7 @@ public class IntegerReserveRow {
 	
 	
 	
-	public IntegerReserveRow(byte opcode, int id, int vk, int vj, int qj,
+	public IntegerReserveRow(byte opcode, int id, int vj, int vk, int qj,
 			int qk, int rob, boolean busy, int address, boolean taken) {
 		super();
 		Opcode = opcode;

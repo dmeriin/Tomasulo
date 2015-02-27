@@ -6,17 +6,27 @@ public class Execution {
 	static int AluStResult= Integer.MIN_VALUE;
 	static float FpAddResult= Float.MIN_VALUE;
 	static float FpMulResult= Float.MIN_VALUE;
-	static FpReserveRow ReadyFpAddRow;
+	/*static FpReserveRow ReadyFpAddRow;
 	static FpReserveRow ReadyFpMulRow;
 	static IntegerReserveRow ReadyIntRow;
 	static IntegerReserveRow ReadyLdRow;
-	static IntegerReserveRow ReadyStRow;
+	static IntegerReserveRow ReadyStRow;*/
 	static int ReadyIntRowIndex = -1;
 	static int ReadyLdRowIndex = -1;
 	static int ReadyStRowIndex = -1;
 	static int ReadyFpMulRowIndex = -1;
 	static int ReadyFpAddRowIndex = -1;
 	
+	private static int CurrAluIntResult = Integer.MIN_VALUE;
+	private static int CurrAluLdResult= Integer.MIN_VALUE;
+	private static int CurrAluStResult= Integer.MIN_VALUE;
+	private static float CurrFpAddResult= Float.MIN_VALUE;
+	private static float CurrFpMulResult= Float.MIN_VALUE;
+	private static int CurrIntRowIndex = -1;
+	private static int CurrLdRowIndex = -1;
+	private static int CurrStRowIndex = -1;
+	private static int CurrFpMulRowIndex = -1;
+	private static int CurrFpAddRowIndex = -1;
 	private static IntegerReserveRow CurrIntRow;
 	private static IntegerReserveRow CurrLdRow;
 	private static IntegerReserveRow CurrStRow;
@@ -33,24 +43,49 @@ public class Execution {
 		 * the operations that finished in the last cycle can be written to CDB in this cycle.
 		 */
 		if(CurrIntRow != null && CurrIntRow.Busy==false){
-			ReadyIntRow = CurrIntRow;
+		//	ReadyIntRow = CurrIntRow;
+			ReadyIntRowIndex = CurrIntRowIndex;
+			AluIntResult = CurrAluIntResult;
+			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyIntRowIndex].GetOpcode() +" index: " + ReadyIntRowIndex + " Rseult: " + AluIntResult);
 			CurrIntRow = null;
+			CurrIntRowIndex = -1;
+			CurrAluIntResult = Integer.MIN_VALUE;
 		}
 		if(CurrLdRow != null && CurrLdRow.Busy==false){
-			ReadyLdRow = CurrLdRow;
+		//	ReadyLdRow = CurrLdRow;
+			ReadyLdRowIndex = CurrLdRowIndex;
+			AluLdResult = CurrAluLdResult;
+			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyLdRowIndex].GetOpcode() +" index: " + ReadyLdRowIndex + " Rseult: " + AluLdResult);
 			CurrLdRow=null;
+			CurrLdRowIndex = -1;
+			CurrAluLdResult = Integer.MIN_VALUE;
 		}
 		if(CurrStRow != null && CurrStRow.Busy==false){
-			ReadyStRow = CurrStRow;
+		//	ReadyStRow = CurrStRow;
+			ReadyStRowIndex = CurrStRowIndex;
+			AluStResult = CurrAluStResult;
+			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyStRowIndex].GetOpcode() +" index: " + ReadyStRowIndex + " Rseult: " + AluStResult);
 			CurrStRow = null;
+			CurrStRowIndex = -1;
+			CurrAluStResult = Integer.MIN_VALUE;
 		}
 		if(CurrFpAddRow != null && CurrFpAddRow.Busy==false){
-			ReadyFpAddRow = CurrFpAddRow;
+		//	ReadyFpAddRow = CurrFpAddRow;
+			ReadyFpAddRowIndex = CurrFpAddRowIndex;
+			FpAddResult = CurrFpAddResult;
+			System.out.println("Write CDB - FP: " +"op code: "+ Utils.FpAddReserveStation[ReadyFpAddRowIndex].GetOpcode() +" index: " + ReadyFpAddRowIndex + " Rseult: " + FpAddResult);
 			CurrFpAddRow = null;
+			CurrFpAddRowIndex = -1;
+			CurrFpAddResult = Float.MIN_VALUE;
 		}
 		if(CurrFpMulRow != null && CurrFpMulRow.Busy==false){
-			ReadyFpMulRow = CurrFpMulRow;
+		//	ReadyFpMulRow = CurrFpMulRow;
+			ReadyFpMulRowIndex = CurrFpMulRowIndex;
+			FpMulResult = CurrFpMulResult;
+			System.out.println("Write CDB - FP: " +"op code: "+ Utils.FpMulReserveStation[ReadyFpMulRowIndex].GetOpcode() +" index: " + ReadyFpMulRowIndex + " Rseult: " + FpMulResult);
 			CurrFpMulRow = null;
+			CurrFpMulRowIndex = -1;
+			CurrFpMulResult = Float.MIN_VALUE;
 		}
 		
 		/*
@@ -58,36 +93,38 @@ public class Execution {
 		 */
 		for (int i = 0; i < Utils.IntReserveStation.length; i++)
 		{
-			if(Utils.IntReserveStation[i] != null)
+			if(Utils.IntReserveStation[i] != null && Utils.AluIntCounters[i]==0)
 			{			
 				if(Utils.IntReserveStation[i].GetOpcode()!= OpCodes.LD_OPCODE && Utils.IntReserveStation[i].GetOpcode()!= OpCodes.ST_OPCODE)
 				{
 					if(Utils.IntReserveStation[i].Busy && Utils.IntReserveStation[i].Vj != Integer.MIN_VALUE && Utils.IntReserveStation[i].Vk != Integer.MIN_VALUE)
 					{
+						System.out.println("Start - Int: "+"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i);
 						Utils.AluIntCounters[i]=Utils.ConfigParams.IntDelay;
 						TraceRecord record = Trace.GetRecord(Utils.IntReserveStation[i].ID);
 						record.CycleExeuctedStart = Utils.CycleCounter;
 						break;
 					}
 				}
-				else if(Utils.IntReserveStation[i].GetOpcode()== OpCodes.LD_OPCODE){
-					//TODO check how LD operation look in the reservation station
-						/*if(Utils.IntReserveStation[i].Busy && Utils.IntReserveStation[i].Vj != Integer.MIN_VALUE && Utils.IntReserveStation[i].Vk != Integer.MIN_VALUE){
-							Utils.AluIntCounters[i]=Utils.ConfigParams.IntDelay;
-							TraceRecord record = Trace.GetRecord(Utils.IntReserveStation[i].ID);
-							record.CycleExeuctedStart = Utils.CycleCounter;
-							break;
-						}*/
-						
-					} 
-					else//TODO check how SD operation look in the reservation station
-					{
-						/*if(Utils.IntReserveStation[i].Busy && Utils.IntReserveStation[i].Vj != Integer.MIN_VALUE && Utils.IntReserveStation[i].Vk != Integer.MIN_VALUE){
+				else if(Utils.IntReserveStation[i].GetOpcode()== OpCodes.ST_OPCODE){
+						if(Utils.IntReserveStation[i].Busy && Utils.IntReserveStation[i].Vk != Integer.MIN_VALUE){
+						System.out.println("Start - Int: "+"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i);
 						Utils.AluIntCounters[i]=Utils.ConfigParams.IntDelay;
 						TraceRecord record = Trace.GetRecord(Utils.IntReserveStation[i].ID);
 						record.CycleExeuctedStart = Utils.CycleCounter;
 						break;
-					}*/
+						}
+					} 
+					else if(Utils.MemCounters[i-lenOfInt] == 0)
+					{
+						if(Utils.IntReserveStation[i].Busy && Utils.IntReserveStation[i].Vj != Integer.MIN_VALUE){
+							System.out.println("Start - Int: "+"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i);
+							Utils.AluIntCounters[i]=Utils.ConfigParams.IntDelay;
+							TraceRecord record = Trace.GetRecord(Utils.IntReserveStation[i].ID);
+							record.CycleExeuctedStart = Utils.CycleCounter;
+							break;
+						}
+						
 					}
 			}
 		}
@@ -97,10 +134,11 @@ public class Execution {
 		 */
 		for (int i = 0; i < Utils.FpAddReserveStation.length; i++)
 		{
-			if(Utils.FpAddReserveStation[i] != null)
+			if(Utils.FpAddReserveStation[i] != null && Utils.FpAddCounters[i] == 0)
 			{			
 				if(Utils.FpAddReserveStation[i].Busy && Utils.FpAddReserveStation[i].Vj != Float.MIN_VALUE && Utils.FpAddReserveStation[i].Vk != Float.MIN_VALUE)
 				{
+					System.out.println("Start - FP: "+"op code: "+ Utils.FpAddReserveStation[i].GetOpcode() +" index: " + i);
 					Utils.FpAddCounters[i]=Utils.ConfigParams.AddDelay;
 					TraceRecord record = Trace.GetRecord(Utils.FpAddReserveStation[i].ID);
 					record.CycleExeuctedStart = Utils.CycleCounter;
@@ -114,10 +152,11 @@ public class Execution {
 		 */
 		for (int i = 0; i < Utils.FpMulReserveStation.length; i++)
 		{
-			if(Utils.FpMulReserveStation[i] != null)
+			if(Utils.FpMulReserveStation[i] != null && Utils.FpMulCounters[i] == 0)
 			{			
 				if(Utils.FpMulReserveStation[i].Busy && Utils.FpMulReserveStation[i].Vj != Float.MIN_VALUE && Utils.FpMulReserveStation[i].Vk != Float.MIN_VALUE)
 				{
+					System.out.println("Start - FP: "+"op code: "+ Utils.FpMulReserveStation[i].GetOpcode() +" index: " + i);
 					Utils.FpMulCounters[i]=Utils.ConfigParams.AddDelay;
 					TraceRecord record = Trace.GetRecord(Utils.FpMulReserveStation[i].ID);
 					record.CycleExeuctedStart = Utils.CycleCounter;
@@ -137,9 +176,10 @@ public class Execution {
 				if (Utils.FpAddCounters[i]==0)
 				{
 					CurrFpAddRow = Utils.FpAddReserveStation[i];
-					FpAddResult = DoFpOperation(CurrFpAddRow.GetOpcode(),CurrFpAddRow.Vj,CurrFpAddRow.Vk);
+					CurrFpAddResult = DoFpOperation(CurrFpAddRow.GetOpcode(),CurrFpAddRow.Vj,CurrFpAddRow.Vk);
 					CurrFpAddRow.Busy=false;//in the next cycle need to be removed by issue or in this cycle by wcdb.
-					ReadyFpAddRowIndex = i;
+					CurrFpAddRowIndex = i;
+					System.out.println("Finish - FP: " +"op code: "+ Utils.FpAddReserveStation[i].GetOpcode() +" index: " + i + " Rseult: " + CurrFpAddResult);
 				}
 			}
 		}
@@ -155,9 +195,10 @@ public class Execution {
 				if (Utils.FpMulCounters[i]==0)
 				{
 					CurrFpMulRow = Utils.FpMulReserveStation[i];
-					FpMulResult = DoFpOperation(CurrFpMulRow.GetOpcode(),CurrFpMulRow.Vj,CurrFpMulRow.Vk);
+					CurrFpMulResult = DoFpOperation(CurrFpMulRow.GetOpcode(),CurrFpMulRow.Vj,CurrFpMulRow.Vk);
 					CurrFpMulRow.Busy=false;//in the next cycle need to be removed by issue or in this cycle by wcdb.
-					ReadyFpMulRowIndex = i;
+					CurrFpMulRowIndex = i;
+					System.out.println("Finish - FP: " +"op code: "+ Utils.FpMulReserveStation[i].GetOpcode() +" index: " + i + " Rseult: " + CurrFpMulResult);
 				}
 			}
 		}
@@ -173,20 +214,15 @@ public class Execution {
 				if (Utils.AluIntCounters[i]==0)
 				{
 					CurrIntRow = Utils.IntReserveStation[i];
-					
-					//TODO depend on how the issue put the branch operation data - where is the jump address in vk or Address ?
-					//if its in vk don't need the if - else, and if its in Address we need the if - else.
-					
-					/*if(CurrIntRow.GetOpcode() == OpCodes.BEQ_OPCODE || CurrIntRow.GetOpcode() == OpCodes.BNE_OPCODE || CurrIntRow.GetOpcode() == OpCodes.JUMP_OPCODE)
+					CurrAluIntResult = DoIntOperation(CurrIntRow.GetOpcode(),CurrIntRow.Vj,CurrIntRow.Vk);
+					if(CurrIntRow.GetOpcode() == OpCodes.BEQ_OPCODE || CurrIntRow.GetOpcode() == OpCodes.BNE_OPCODE || CurrIntRow.GetOpcode() == OpCodes.JUMP_OPCODE)
 					{
-						AluIntResult = DoIntOperation(CurrIntRow.GetOpcode(),CurrIntRow.Vj,CurrIntRow.Address);
+						if(CurrAluIntResult == 1)
+							CurrAluIntResult = CurrIntRow.Address;
 					}
-					else
-					{*/
-					AluIntResult = DoIntOperation(CurrIntRow.GetOpcode(),CurrIntRow.Vj,CurrIntRow.Vk);
-					//}
 					CurrIntRow.Busy=false;//in the next cycle need to be removed by issue or in this cycle by wcdb.
-					ReadyIntRowIndex = i;
+					CurrIntRowIndex = i;
+					System.out.println("Finish - int: " +"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i + " Rseult: " + CurrAluIntResult);
 				}
 			}
 		}
@@ -195,7 +231,8 @@ public class Execution {
 		 */
 		for (; i < lenOfInt + lenOfLDBuff; i++) {
 	
-			if(Utils.AluIntCounters[i]!=0){
+			if(Utils.AluIntCounters[i]!=0)
+			{
 				Utils.AluIntCounters[i]--;
 				//if the address calculation is finished
 				if (Utils.AluIntCounters[i]==0)
@@ -206,28 +243,42 @@ public class Execution {
 					
 					if(Utils.MemCounters[i-lenOfInt] == 0)
 					{
-						if(Utils.MemInUse == false)
-						{
+						
 							Utils.MemCounters[i-lenOfInt] = Utils.ConfigParams.MemDelay;
-							Utils.MemInUse = true;
-						}
-						else//the memory in use so wait for the next cycle
+						
+						/*else//the memory in use so wait for the next cycle
 						{
 							Utils.AluIntCounters[i]++;
-						}
+						}*/
 					}
-					else//we already start to load from memory, advance one step.
+				}
+			}
+			//load from memory, advance one step.
+			else if(Utils.AluIntCounters[i]==0 && Utils.MemCounters[i-lenOfInt]!=0)
+			{
+				
+				//set MemInUse to be true only for the first cycle of loading from memory
+				if(Utils.MemCounters[i-lenOfInt] == Utils.ConfigParams.MemDelay)
+				{
+					if(Utils.MemInUse == false)
 					{
-						Utils.MemCounters[i-lenOfInt]--;
-						if(Utils.MemCounters[i-lenOfInt]==0)
-						{//if we finish load from memory we can write the result in the next cycle.
-							CurrLdRow = Utils.IntReserveStation[i];
-							AluLdResult = DoIntOperation(CurrLdRow.GetOpcode(),CurrLdRow.Vj,CurrLdRow.Address);
-							CurrLdRow.Address = CurrLdRow.Vj+CurrLdRow.Address;
-							ReadyLdRowIndex = i;
-							CurrLdRow.Busy = false;
-						}
+						Utils.MemInUse = true;
+						System.out.println("Start Load : " + " index: " + i);
 					}
+					else
+					{
+						continue;
+					}
+				}
+				Utils.MemCounters[i-lenOfInt]--;
+				if(Utils.MemCounters[i-lenOfInt]==0)
+				{//if we finish load from memory we can write the result in the next cycle.
+					CurrLdRow = Utils.IntReserveStation[i];
+					CurrAluLdResult = DoIntOperation(CurrLdRow.GetOpcode(),CurrLdRow.Vj,CurrLdRow.Address);
+					CurrLdRow.Address = CurrLdRow.Vj+CurrLdRow.Address;
+					CurrLdRowIndex = i;
+					CurrLdRow.Busy = false;
+					System.out.println("Finish - int: " +"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i + " Rseult: " + CurrAluLdResult);
 				}
 			}
 		}
@@ -242,9 +293,10 @@ public class Execution {
 				if (Utils.AluIntCounters[i]==0)
 				{
 					CurrStRow = Utils.IntReserveStation[i];
-					AluStResult = DoIntOperation(CurrStRow.GetOpcode(),CurrStRow.Vk,CurrStRow.Address);
+					CurrAluStResult = DoIntOperation(CurrStRow.GetOpcode(),CurrStRow.Vk,CurrStRow.Address);
 					CurrStRow.Busy = false;
-					ReadyStRowIndex = i;
+					CurrStRowIndex = i;
+					System.out.println("Finish - int: " +"op code: "+ Utils.IntReserveStation[i].GetOpcode() +" index: " + i + " Rseult: " + CurrAluStResult);
 				}
 			}
 		}
@@ -260,15 +312,15 @@ public class Execution {
 			return Utils.MainMem[Utils.AddressToRowNum(vj + vk)];
 		case OpCodes.ST_OPCODE :
 			return vj + vk;
-		case OpCodes.JUMP_OPCODE :
-			return vk;//jump always taken, return the address.
+		/*case OpCodes.JUMP_OPCODE :
+			return 1;//jump always taken, return the address.*/
 		case OpCodes.BEQ_OPCODE :
-			if(vj==0)
-				return vk; // branch take return the address.
+			if(vj==vk)
+				return 1; // branch take return the address.
 			return -1;//branch did not taken return -1.
 		case OpCodes.BNE_OPCODE :
-			if(vj!=0)
-				return vk; // branch take return the address.
+			if(vj!=vk)
+				return 1; // branch take return the address.
 			return -1;//branch did not taken return -1.
 		case OpCodes.ADD_OPCODE :
 			return vj + vk;

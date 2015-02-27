@@ -33,7 +33,7 @@ public class RobQueue {
 		int temp = tail;
 		while (temp!=head) {
 			Delete(temp);
-			Increment(temp);
+			temp = Increment(temp);
 		}
 	}
 	
@@ -45,7 +45,7 @@ public class RobQueue {
 		size=0;
 	}
 	public int Increment(int index){
-		return index < QueueMaxSize -1 ? index+1 : 0;	
+		return index < (QueueMaxSize -1) ? index+1 : 0;	
 	}
 	
 	public int Size(){

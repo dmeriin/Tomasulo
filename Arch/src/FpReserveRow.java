@@ -4,14 +4,14 @@ public class FpReserveRow {
 
 	private byte Opcode;
 	int ID;
-	int Vk;
-	int Vj;
+	float Vk;
+	float Vj;
 	int Qj;
 	int Qk;
 	int ROB;
 	boolean Busy;
 	
-	public FpReserveRow(byte opcode, int id, int vk, int vj, int qj, int qk,
+	public FpReserveRow(byte opcode, int id, float vj, float vk, int qj, int qk,
 			int rob, boolean busy) {
 		super();
 		Opcode = opcode;

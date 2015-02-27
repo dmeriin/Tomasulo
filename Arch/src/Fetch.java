@@ -2,21 +2,26 @@
 public class Fetch {
 
 	public static boolean run(){
-		boolean status = true;
+		
 		if(Utils.InstructionQueue.size()==Utils.InsturctionQueueSize)
-			return status;
+		{
+			return true;
+		}
 		int instruction = Utils.MainMem[Utils.AddressToRowNum(Utils.PC)];
 		int id = Trace.AddRecord(instruction);
+		boolean isBranchTaken = false;
 		Integer tempPc = Utils.BTB.get(Utils.PC);
-		if(tempPc==null){
-			Utils.InstructionQueue.add(new InstructionContainer(instruction, false,id));
+		if(tempPc==null)
+		{
 			Utils.PC += 4;
 		}
-		else{
-			Utils.InstructionQueue.add(new InstructionContainer(instruction, true,id));
+		else
+		{
+			isBranchTaken = true;
 			Utils.PC = tempPc;
 		}
+		Utils.InstructionQueue.add(new InstructionContainer(instruction, isBranchTaken,id));
 		
-		return status;
+		return true;
 	}
 }

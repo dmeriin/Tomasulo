@@ -2,7 +2,7 @@
 public class Commit {
 
 	private static boolean duringSTCommit=false;
-	private static int CommitCounter = 0;
+	private static int CommitSTCounter = 0;
 	
 
 	public static boolean run(){
@@ -14,7 +14,7 @@ public class Commit {
 			{
 				switch (op) {
 				
-				case OpCodes.LD_OPCODE:
+				case OpCodes.LD_OPCODE://maybe different case how to write the float value ? 
 				case OpCodes.ADD_S_OPCODE:
 				case OpCodes.SUB_S_OPCODE:
 				case OpCodes.MULT_S_OPCODE:
@@ -48,8 +48,8 @@ public class Commit {
 			{
 				if(duringSTCommit)
 				{
-					CommitCounter--;
-					if(CommitCounter==0)
+					CommitSTCounter--;
+					if(CommitSTCounter==0)
 					{
 						TraceRecord record = Trace.GetRecord(head.ID);
 						record.CycleCommit= Utils.CycleCounter;
@@ -62,7 +62,7 @@ public class Commit {
 				{
 					if(Utils.MemInUse == false)
 					{
-						CommitCounter = Utils.ConfigParams.MemDelay-1;
+						CommitSTCounter = Utils.ConfigParams.MemDelay-1;
 						duringSTCommit = true;
 					}
 				}
