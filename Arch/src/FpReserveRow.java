@@ -11,20 +11,6 @@ public class FpReserveRow {
 	int ROB;
 	boolean Busy;
 	
-	
-	// TODO: is needed?
-	public FpReserveRow(byte opcode, int id, float vk, float vj, int qj, int qk,
-			int rob) {
-		Opcode = opcode;
-		ID = id;
-		Vk = vk;
-		Vj = vj;
-		Qj = qj;
-		Qk = qk;
-		ROB = rob;
-		Busy = true;
-	}
-	
 	public FpReserveRow( byte opcode, int id )
 	{
 		this.Opcode = opcode;

@@ -2,6 +2,9 @@
 public class MemBufferRow {
 	int ID;
 	int ROB;
+	int Vj;
+	int Qj;
+	int Vk;
 	boolean Busy;
 	int Address;
 	

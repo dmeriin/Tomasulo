@@ -24,7 +24,7 @@ public class sim {
 		Utils.ConfigParams.MulNrReservation = 5;
 		Utils.ConfigParams.RobEntries = 10;
 		Utils.Init(Utils.ConfigParams);
-		
+		/*
 		FpReserveRow fp1 = new FpReserveRow(OpCodes.ADD_S_OPCODE, 1, flArr[0], flArr[0], Integer.MIN_VALUE, Integer.MIN_VALUE, 0, true);
 		FpReserveRow fp2 = new FpReserveRow(OpCodes.ADD_S_OPCODE, 2, flArr[0], flArr[1], Integer.MIN_VALUE, Integer.MIN_VALUE, 1, true);
 		FpReserveRow fp3 = new FpReserveRow(OpCodes.MULT_S_OPCODE, 3, Float.MIN_VALUE, Float.MIN_VALUE, 1, 0, 2, true);
@@ -81,7 +81,7 @@ public class sim {
 			if(i==8){
 				Utils.IntReserveStation[6].Vk = intArr[0] + intArr[0];
 			}
-		}
+		}*/
 	}
 	
 	public static void main(String[] args) 

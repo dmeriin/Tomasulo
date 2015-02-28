@@ -30,14 +30,6 @@ public class WriteCDB {
 			
 		}
 		
-		// Update int reg table only if the robID is the current rob id
-		
-		if ( Utils.IntRegStatusTable[robRow.Destination].Rob == Execution.ReadyIntRow.ROB )
-		{
-			Utils.IntRegStatusTable[robRow.Destination].Value = Execution.AluIntResult;
-			Utils.IntRegStatusTable[robRow.Destination].Rob = RobQueue.INVALID_ROB_ID;
-		}
-		
 		// Remove row from resv stat
 		Utils.IntRegStatusTable[Execution.ReadyIntRowIndex] = null;
 	}
@@ -244,13 +236,6 @@ public class WriteCDB {
 		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyFpAddRow.ROB, Execution.FpAddResult);
 		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyFpAddRow.ROB, Execution.FpAddResult);
 		
-		// Update fp reg table only if the rob id is the current rob id
-		if ( Utils.FpStatusTable[robRow.Destination].Rob == Execution.ReadyFpAddRow.ROB )
-		{
-			Utils.FpStatusTable[robRow.Destination].Value = Execution.FpAddResult;
-			Utils.FpStatusTable[robRow.Destination].Rob = RobQueue.INVALID_ROB_ID;
-		}
-		
 		// Remove row from resv stat
 		Utils.FpAddReserveStation[Execution.ReadyFpAddRowIndex] = null;
 		
@@ -290,13 +275,6 @@ public class WriteCDB {
 		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyFpMulRow.ROB, Execution.FpMulResult);
 		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyFpMulRow.ROB, Execution.FpMulResult);
 		
-		// Update fp reg table only if the rob id is the current rob id
-		if ( Utils.FpStatusTable[robRow.Destination].Rob == Execution.ReadyFpMulRow.ROB )
-		{
-			Utils.FpStatusTable[robRow.Destination].Value = Execution.FpMulResult;
-			Utils.FpStatusTable[robRow.Destination].Rob = RobQueue.INVALID_ROB_ID;
-		}
-		
 		// Remove row from resv stat
 		Utils.FpMulReserveStation[Execution.ReadyFpMulRowIndex] = null;
 	}
@@ -311,13 +289,6 @@ public class WriteCDB {
 		// Update reservation stations
 		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyLdRow.ROB, Execution.AluLdResult);
 		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyLdRow.ROB, Execution.AluLdResult);
-		
-		// Update fp reg table only if the rob id is the current rob id
-		if ( Utils.FpStatusTable[robRow.Destination].Rob == Execution.ReadyLdRow.ROB )
-		{
-			Utils.FpStatusTable[robRow.Destination].Value = Execution.AluLdResult;
-			Utils.FpStatusTable[robRow.Destination].Rob = RobQueue.INVALID_ROB_ID;
-		}
 		
 		// Remove row from resv stat
 		Utils.LoadBuffer[Execution.ReadyLdRowIndex] = null;

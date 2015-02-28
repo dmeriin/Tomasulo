@@ -8,11 +8,11 @@ public class Execution {
 	static int AluStResult= Integer.MIN_VALUE;
 	static float FpAddResult= Float.MIN_VALUE;
 	static float FpMulResult= Float.MIN_VALUE;
-	/*static FpReserveRow ReadyFpAddRow;
+	static FpReserveRow ReadyFpAddRow;
 	static FpReserveRow ReadyFpMulRow;
 	static IntegerReserveRow ReadyIntRow;
 	static IntegerReserveRow ReadyLdRow;
-	static IntegerReserveRow ReadyStRow;*/
+	static IntegerReserveRow ReadyStRow;
 	static int ReadyIntRowIndex = -1;
 	static int ReadyLdRowIndex = -1;
 	static int ReadyStRowIndex = -1;
@@ -45,7 +45,7 @@ public class Execution {
 		 * the operations that finished in the last cycle can be written to CDB in this cycle.
 		 */
 		if(CurrIntRow != null && CurrIntRow.Busy==false){
-		//	ReadyIntRow = CurrIntRow;
+			ReadyIntRow = CurrIntRow;
 			ReadyIntRowIndex = CurrIntRowIndex;
 			AluIntResult = CurrAluIntResult;
 			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyIntRowIndex].GetOpcode() +" index: " + ReadyIntRowIndex + " Rseult: " + AluIntResult);
@@ -54,7 +54,7 @@ public class Execution {
 			CurrAluIntResult = Integer.MIN_VALUE;
 		}
 		if(CurrLdRow != null && CurrLdRow.Busy==false){
-		//	ReadyLdRow = CurrLdRow;
+			ReadyLdRow = CurrLdRow;
 			ReadyLdRowIndex = CurrLdRowIndex;
 			AluLdResult = CurrAluLdResult;
 			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyLdRowIndex].GetOpcode() +" index: " + ReadyLdRowIndex + " Rseult: " + AluLdResult);
@@ -63,7 +63,7 @@ public class Execution {
 			CurrAluLdResult = Integer.MIN_VALUE;
 		}
 		if(CurrStRow != null && CurrStRow.Busy==false){
-		//	ReadyStRow = CurrStRow;
+			ReadyStRow = CurrStRow;
 			ReadyStRowIndex = CurrStRowIndex;
 			AluStResult = CurrAluStResult;
 			System.out.println("Write CDB - int: " +"op code: "+ Utils.IntReserveStation[ReadyStRowIndex].GetOpcode() +" index: " + ReadyStRowIndex + " Rseult: " + AluStResult);
@@ -72,7 +72,7 @@ public class Execution {
 			CurrAluStResult = Integer.MIN_VALUE;
 		}
 		if(CurrFpAddRow != null && CurrFpAddRow.Busy==false){
-		//	ReadyFpAddRow = CurrFpAddRow;
+			ReadyFpAddRow = CurrFpAddRow;
 			ReadyFpAddRowIndex = CurrFpAddRowIndex;
 			FpAddResult = CurrFpAddResult;
 			System.out.println("Write CDB - FP: " +"op code: "+ Utils.FpAddReserveStation[ReadyFpAddRowIndex].GetOpcode() +" index: " + ReadyFpAddRowIndex + " Rseult: " + FpAddResult);
@@ -81,7 +81,7 @@ public class Execution {
 			CurrFpAddResult = Float.MIN_VALUE;
 		}
 		if(CurrFpMulRow != null && CurrFpMulRow.Busy==false){
-		//	ReadyFpMulRow = CurrFpMulRow;
+			ReadyFpMulRow = CurrFpMulRow;
 			ReadyFpMulRowIndex = CurrFpMulRowIndex;
 			FpMulResult = CurrFpMulResult;
 			System.out.println("Write CDB - FP: " +"op code: "+ Utils.FpMulReserveStation[ReadyFpMulRowIndex].GetOpcode() +" index: " + ReadyFpMulRowIndex + " Rseult: " + FpMulResult);
