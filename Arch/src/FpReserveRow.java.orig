@@ -11,10 +11,16 @@ public class FpReserveRow {
 	int ROB;
 	boolean Busy;
 	
+<<<<<<< HEAD
+	public FpReserveRow(byte opcode, int id, float vj, float vk, int qj, int qk,
+			int rob, boolean busy) {
+		super();
+=======
 	
 	// TODO: is needed?
 	public FpReserveRow(byte opcode, int id, float vk, float vj, int qj, int qk,
 			int rob) {
+>>>>>>> WriteCDB
 		Opcode = opcode;
 		ID = id;
 		Vk = vk;

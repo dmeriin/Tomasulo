@@ -2,7 +2,18 @@
 
 public class sim {
 
+	/**
+	 * @param args
+	 */
+	public static void main2(String[] args) {
+		// TODO Auto-generated method stub
+		
+		testExecution();
+		System.out.println("Done");
+		
+	}
 	
+<<<<<<< HEAD
 	public static void testExecution(){
 		float[] flArr = new float[5];
 		flArr[0] = 3.256f;
@@ -82,8 +93,7 @@ public class sim {
 				Utils.IntReserveStation[6].Vk = intArr[0] + intArr[0];
 			}
 		}
-	}
-	
+=======
 	public static void main(String[] args) 
 	{
 		Utils.MainMem  = FileHandler.ReadMainMem("memin.txt");
@@ -96,6 +106,7 @@ public class sim {
 			Issue.run();
 		}
 		
+>>>>>>> WriteCDB
 	}
 
 }

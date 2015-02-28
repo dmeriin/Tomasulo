@@ -2,9 +2,8 @@
 public class FpRegStatus {
 
 	float Value;
-	short Rob;
-	public FpRegStatus(float value, short rob) {
-		super();
+	int Rob;
+	public FpRegStatus(float value, int rob) {
 		Value = value;
 		Rob = rob;
 	}

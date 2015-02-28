@@ -14,7 +14,6 @@ public class RobRow {
 	
 	public RobRow(byte opcode, int id, int destination, Object value,
 			boolean ready) {
-		super();
 		Opcode = opcode;
 		ID = id;
 		Destination = destination;

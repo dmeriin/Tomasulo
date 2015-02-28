@@ -13,4 +13,40 @@ public class OpCodes {
 	public static final byte SUB_S_OPCODE = 10;
 	public static final byte MULT_S_OPCODE = 11;
 	public static final byte HALT_OPCODE = 12;
+	public static final byte NOT_SUPPORTED = 13;
+	
+	public static boolean isOpSetToFloat(byte opcode)
+	{
+		boolean retVal = false;
+		
+		switch ( opcode )
+		{
+			case OpCodes.ADD_S_OPCODE:
+			case OpCodes.SUB_S_OPCODE:
+			case OpCodes.MULT_S_OPCODE:
+			case OpCodes.LD_OPCODE:
+				retVal = true;
+				break;
+		}
+		
+		return retVal; 
+	}
+	
+	public static boolean isOpSetToInt(byte opcode)
+	{
+		boolean retVal = false;
+		
+		switch ( opcode )
+		{
+			case OpCodes.ADDI_OPCODE:
+			case OpCodes.SUBI_OPCODE:				
+			case OpCodes.ADD_OPCODE:
+			case OpCodes.SUB_OPCODE:
+				retVal = true;
+				break;
+		}
+		
+		return retVal; 
+	}
+	
 }

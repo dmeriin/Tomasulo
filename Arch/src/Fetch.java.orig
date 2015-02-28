@@ -11,6 +11,7 @@ public class Fetch {
 		int id = Trace.AddRecord(instruction);
 		boolean isBranchTaken = false;
 		Integer tempPc = Utils.BTB.get(Utils.PC);
+<<<<<<< HEAD
 		if(tempPc==null)
 		{
 			Utils.PC += 4;
@@ -18,9 +19,17 @@ public class Fetch {
 		else
 		{
 			isBranchTaken = true;
+=======
+		if(tempPc==null){
+			Utils.InstructionQueue.add(new InstructionContainer(instruction, false,id, Utils.PC));
+			Utils.PC += 4;
+		}
+		else{
+			Utils.InstructionQueue.add(new InstructionContainer(instruction, true,id, Utils.PC));
+>>>>>>> WriteCDB
 			Utils.PC = tempPc;
 		}
-		Utils.InstructionQueue.add(new InstructionContainer(instruction, isBranchTaken,id, Utils.PC));
+		Utils.InstructionQueue.add(new InstructionContainer(instruction, isBranchTaken,id));
 		
 		return true;
 	}

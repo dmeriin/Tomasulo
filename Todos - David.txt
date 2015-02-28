@@ -1,3 +1,28 @@
 1. Order of fetch/issue/etc... Make sure write for example doesn't do something when execute finished in that same cycle. 
 2. instruction container . taken/not taken?
-3. if unknown opcode is received, put in to rob. when commiting, check opcode type (use enum) and if not supported, halt and exit. It shouold be done in commit in case the opcode is not supported but it wouldn't be called anyway.
+
+4. break int resv stat to int/ld/st?
+5. Jump not inserted to RS and jump/branch address is calculated in issue
+6. Write stage should move st/ld ops from int resv stat to load/store buffer/
+7. change check of resv stat from is null to is busy ( that shuold be the correct way ). If we choose to do that, when moving to load/store another field should be added to int resv stat to state whether we shouold move to store/load buffer or not (instead of checking in write cdb the busy field.)
+8. TODOS in code
+
+Check with yossi :
+1. execute - since int ld and store all in the same resv station after int found there's a break is it ok?
+2. removed jump from execution.
+3. Execute - need to check Qj & Qk to be both equal 0 .. not vj/vk to be equal to -1.
+4. compartion of branch operation is between 2 registers and not comapred to 0.
+5. branch address is saved to "address"
+6. how does load work ? first calc address and then go to memory?
+7. dst field is used to hold immediate on store?
+8. check load and store execution again/
+9 . Memory alias?
+10. if unknown opcode is received, put in to rob. when commiting, check opcode type (use enum) and if not supported, halt and exit. It shouold be done in commit in case the opcode is not supported but it wouldn't be called anyway.\
+11. When commiting store get value of float from registers? or update every time writing to cdb?
+12. why is ReadyStRow needed?
+13. after store remvoe from store buffer.
+14. EXECUTION - advance one step each of the  operation. no check that step can actual be performed . Counter decreases anyway.
+15. because mem ops may not enter the load/store buffer, 
+16. PC incremented where and how do other stages deal with it.
+17. JUMP and btb..
+18. IntegerReserveRow and maybe fpReserveRow change of general ctor  vj<->vk

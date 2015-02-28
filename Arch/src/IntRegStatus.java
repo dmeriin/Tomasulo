@@ -2,10 +2,9 @@
 public class IntRegStatus {
 
 	int Value;
-	short Rob;
+	int Rob;
 	
-	public IntRegStatus(int value, short rob) {
-		super();
+	public IntRegStatus(int value, int rob) {
 		Value = value;
 		Rob = rob;
 	}

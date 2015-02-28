@@ -314,16 +314,27 @@ public class Execution {
 			return Utils.MainMem[Utils.AddressToRowNum(vj + vk)];
 		case OpCodes.ST_OPCODE :
 			return vj + vk;
+<<<<<<< HEAD
 		/*case OpCodes.JUMP_OPCODE :
 			return 1;//jump always taken, return the address.*/
 		case OpCodes.BEQ_OPCODE :
 			if(vj==vk)
 				return 1; // branch take return the address.
-			return BRANCH_NOT_TAKEN;//branch did not taken return -1.
+			return -1;//branch did not taken return -1.
 		case OpCodes.BNE_OPCODE :
 			if(vj!=vk)
 				return 1; // branch take return the address.
+			return -1;//branch did not taken return -1.
+=======
+		case OpCodes.BEQ_OPCODE :
+			if(vj==0)
+				return vk; // branch take return the address.
 			return BRANCH_NOT_TAKEN;//branch did not taken return -1.
+		case OpCodes.BNE_OPCODE :
+			if(vj!=0)
+				return vk; // branch take return the address.
+			return BRANCH_NOT_TAKEN;//branch did not taken return -1.
+>>>>>>> WriteCDB
 		case OpCodes.ADD_OPCODE :
 			return vj + vk;
 		case OpCodes.ADDI_OPCODE :
