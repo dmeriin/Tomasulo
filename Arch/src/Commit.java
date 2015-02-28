@@ -7,71 +7,77 @@ public class Commit {
 
 	public static boolean run(){
 		RobQueue ROB = Utils.RobTable;
-		RobRow head = ROB.queue[ROB.head];
-		TraceRecord record = Trace.GetRecord(head.ID);
-		
-		//check if the head of the rob is insert in this cycle if true then don't commit the head this cycle.
-		if(headInsertThisCycle(head,record)){
-			Utils.MemInUse = false;
-			return true;
-		}
-		if(head.Ready){
-			byte op = head.GetOpcode();
-			if (op != OpCodes.ST_OPCODE)
+		if ( ROB.head !=  -1  )
+		{
+			RobRow head = ROB.queue[ROB.head];
+			if ( head != null )
 			{
-				switch (op) {
+				TraceRecord record = Trace.GetRecord(head.ID);
 				
-				case OpCodes.LD_OPCODE:
-				case OpCodes.ADD_S_OPCODE:
-				case OpCodes.SUB_S_OPCODE:
-				case OpCodes.MULT_S_OPCODE:
-					Utils.FpStatusTable[head.Destination].Value=(float) head.Value;
-					if(Utils.FpStatusTable[head.Destination].Rob == ROB.head)
-						Utils.FpStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
-					break;
-				case OpCodes.ADD_OPCODE:
-				case OpCodes.SUB_OPCODE:
-				case OpCodes.ADDI_OPCODE:
-				case OpCodes.SUBI_OPCODE:
-					Utils.IntRegStatusTable[head.Destination].Value = (int) head.Value;
-					if(Utils.IntRegStatusTable[head.Destination].Rob == ROB.head)
-						Utils.IntRegStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
-					break;
-				case OpCodes.JUMP_OPCODE:
-				case OpCodes.BEQ_OPCODE:
-				case OpCodes.BNE_OPCODE:
-					break;
-				case OpCodes.HALT_OPCODE:
-					Utils.Halt=true;
-					break;
-				default:
-					Utils.Halt=true;
-					ROB.Delete(ROB.head);
-					//TODO Print balagan
+				//check if the head of the rob is insert in this cycle if true then don't commit the head this cycle.
+				if(headInsertThisCycle(head,record)){
+					Utils.MemInUse = false;
 					return true;
 				}
-				record.CycleCommit= Utils.CycleCounter;
-				ROB.Delete(ROB.head);
-			}
-			else
-			{
-				if(duringSTCommit)
-				{
-					CommitSTCounter--;
-					if(CommitSTCounter==0)
+				if(head.Ready){
+					byte op = head.GetOpcode();
+					if (op != OpCodes.ST_OPCODE)
 					{
-						duringSTCommit = false;
-						Utils.MainMem[Utils.AddressToRowNum(head.Destination)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
-					}
-				}
-				else
-				{
-					if(Utils.MemInUse == false)
-					{
+						switch (op) {
+						
+						case OpCodes.LD_OPCODE:
+						case OpCodes.ADD_S_OPCODE:
+						case OpCodes.SUB_S_OPCODE:
+						case OpCodes.MULT_S_OPCODE:
+							Utils.FpStatusTable[head.Destination].Value=(float) head.Value;
+							if(Utils.FpStatusTable[head.Destination].Rob == ROB.head)
+								Utils.FpStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
+							break;
+						case OpCodes.ADD_OPCODE:
+						case OpCodes.SUB_OPCODE:
+						case OpCodes.ADDI_OPCODE:
+						case OpCodes.SUBI_OPCODE:
+							Utils.IntRegStatusTable[head.Destination].Value = (int) head.Value;
+							if(Utils.IntRegStatusTable[head.Destination].Rob == ROB.head)
+								Utils.IntRegStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
+							break;
+						case OpCodes.JUMP_OPCODE:
+						case OpCodes.BEQ_OPCODE:
+						case OpCodes.BNE_OPCODE:
+							break;
+						case OpCodes.HALT_OPCODE:
+							Utils.Halt=true;
+							break;
+						default:
+							Utils.Halt=true;
+							ROB.Delete(ROB.head);
+							//TODO Print balagan
+							return true;
+						}
 						record.CycleCommit= Utils.CycleCounter;
 						ROB.Delete(ROB.head);
-						CommitSTCounter = Utils.ConfigParams.MemDelay-1;
-						duringSTCommit = true;
+					}
+					else
+					{
+						if(duringSTCommit)
+						{
+							CommitSTCounter--;
+							if(CommitSTCounter==0)
+							{
+								duringSTCommit = false;
+								Utils.MainMem[Utils.AddressToRowNum(head.Destination)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
+							}
+						}
+						else
+						{
+							if(Utils.MemInUse == false)
+							{
+								record.CycleCommit= Utils.CycleCounter;
+								ROB.Delete(ROB.head);
+								CommitSTCounter = Utils.ConfigParams.MemDelay-1;
+								duringSTCommit = true;
+							}
+						}
 					}
 				}
 			}

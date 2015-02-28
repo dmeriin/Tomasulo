@@ -114,9 +114,9 @@ public class Issue {
 			}
 			
 			// add row to the btb.
-			Utils.BTB.put( headInst.PC, headInst.PC + decodedInst.Imm );
+			Utils.BTB.put( headInst.PC, headInst.PC + decodedInst.Imm * 4 );
 			
-			Utils.PC =  headInst.PC + decodedInst.Imm;
+			Utils.PC =  headInst.PC + decodedInst.Imm * 4;
 		}
 		
 		
@@ -133,7 +133,7 @@ public class Issue {
 		if ( decodedInst.Opcode == OpCodes.JUMP_OPCODE )
 		{
 			// Calculate target address, assumed to have another hardware for address calculation.
-			value = headInst.PC + decodedInst.Imm;
+			value = headInst.PC + decodedInst.Imm * 4;
 		}
 		
 		// Add new Rob raw, operation is ready by default.
@@ -203,6 +203,11 @@ public class Issue {
 			memBuffRow.Vj = intRegStatus0.Value;
 			memBuffRow.Qj = -1;
 		}
+		else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
+		{
+			memBuffRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
+			memBuffRow.Qj = -1;
+		}
 		else
 		{
 			memBuffRow.Vj = 0;
@@ -241,7 +246,7 @@ public class Issue {
 			if ( decodedInst.Opcode == OpCodes.BEQ_OPCODE || decodedInst.Opcode == OpCodes.BNE_OPCODE )
 			{
 				// Calculate target address, assumed to have another hardware for address calculation.
-				intReserveRow.Address = headInst.PC +  decodedInst.Imm;
+				intReserveRow.Address = headInst.PC +  decodedInst.Imm * 4;
 			}
 			
 			// Add new Rob raw
@@ -251,8 +256,11 @@ public class Issue {
 			// Add row to int reservation station
 			ResvStatHandler.AddRowToResvStat_Int( intReserveRow );
 			
-			// Update int registers table
-			Utils.IntRegStatusTable[decodedInst.Dst].Rob = robID;
+			if (decodedInst.Opcode != OpCodes.BNE_OPCODE && decodedInst.Opcode != OpCodes.BEQ_OPCODE )
+			{
+				// Update int registers table
+				Utils.IntRegStatusTable[decodedInst.Dst].Rob = robID;
+			}
 			
 			// Log issue
 			Trace.GetRecord(headInst.ID).CycleIssued = Utils.CycleCounter;
@@ -268,6 +276,11 @@ public class Issue {
 				intReserveRow.Vj = intRegStatus0.Value;
 				intReserveRow.Qj = -1;
 			}
+			else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
+			{
+				intReserveRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
+				intReserveRow.Qj = -1;
+			}
 			else
 			{
 				intReserveRow.Vj = 0;
@@ -277,6 +290,11 @@ public class Issue {
 			if ( intRegStatus1.Rob == RobQueue.INVALID_ROB_ID )
 			{
 				intReserveRow.Vk = intRegStatus1.Value;
+				intReserveRow.Qk = -1;
+			}
+			else if ( Utils.RobTable.queue[intRegStatus1.Rob].Ready )
+			{
+				intReserveRow.Vk = (int) Utils.RobTable.queue[intRegStatus1.Rob].Value;
 				intReserveRow.Qk = -1;
 			}
 			else
@@ -294,6 +312,11 @@ public class Issue {
 		if ( intRegStatus0.Rob == RobQueue.INVALID_ROB_ID )
 		{
 			intReserveRow.Vj = intRegStatus0.Value;
+			intReserveRow.Qj = -1;
+		}
+		else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
+		{
+			intReserveRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
 			intReserveRow.Qj = -1;
 		}
 		else
@@ -357,6 +380,11 @@ public class Issue {
 			fpReserveRow.Vj = fpRegStatus0.Value;
 			fpReserveRow.Qj = -1;
 		}
+		else if ( Utils.RobTable.queue[fpRegStatus0.Rob].Ready )
+		{
+			fpReserveRow.Vj = (float) Utils.RobTable.queue[fpRegStatus0.Rob].Value;
+			fpReserveRow.Qj = -1;
+		}
 		else
 		{
 			fpReserveRow.Vj = 0;
@@ -368,6 +396,11 @@ public class Issue {
 		if ( fpRegStatus1.Rob == RobQueue.INVALID_ROB_ID )
 		{
 			fpReserveRow.Vk = fpRegStatus1.Value;
+			fpReserveRow.Qk = -1;
+		}
+		else if ( Utils.RobTable.queue[fpRegStatus1.Rob].Ready )
+		{
+			fpReserveRow.Vk = (float) Utils.RobTable.queue[fpRegStatus1.Rob].Value;
 			fpReserveRow.Qk = -1;
 		}
 		else

@@ -31,7 +31,7 @@ public class WriteCDB {
 		}
 		
 		// Remove row from resv stat
-		Utils.IntRegStatusTable[Execution.ReadyIntRowIndex] = null;
+		Utils.IntReserveStation[Execution.ReadyIntRowIndex] = null;
 	}
 	
 	private static void deleteRobFromResvStat ( byte opcode, int robID )
@@ -57,20 +57,12 @@ public class WriteCDB {
 				break;	
 				
 			case OpCodes.LD_OPCODE:
-				// If not found on load buffer, look up on int reservation station.
-				if (!ResvStatHandler.removeRowFromRestStatByRobID_Mem(Utils.LoadBuffer, robID) )
-				{
-					ResvStatHandler.removeRowFromRestStatByRobID_Int(Utils.IntReserveStation, robID) ;
-				}
+				ResvStatHandler.removeRowFromRestStatByRobID_Mem(Utils.LoadBuffer, robID);
 					
 				break;
 				
 			case OpCodes.ST_OPCODE:
-				// If not found on store buffer, look up on int reservation station.
-				if (!ResvStatHandler.removeRowFromRestStatByRobID_Mem(Utils.StoreBuffer, robID))
-				{
-					ResvStatHandler.removeRowFromRestStatByRobID_Int(Utils.IntReserveStation, robID) ;
-				}
+				ResvStatHandler.removeRowFromRestStatByRobID_Mem(Utils.StoreBuffer, robID);
 				break;
 		}
 	}
@@ -100,11 +92,11 @@ public class WriteCDB {
 			case OpCodes.SUBI_OPCODE:				
 			case OpCodes.ADD_OPCODE:
 			case OpCodes.SUB_OPCODE:
-				for (int i = 0 ; i < Utils.FpStatusTable.length ; i ++)
+				for (int i = 0 ; i < Utils.IntRegStatusTable.length ; i ++)
 				{
-					if ( Utils.FpStatusTable[i].Rob == robID )
+					if ( Utils.IntRegStatusTable[i].Rob == robID )
 					{
-						// set the last rob for reigster table. Before robID, for register i, true indicated that the register is an int register.
+						// set the last rob for reigster table. Before robID, for register i, false indicated that the register is an int register.
 						Utils.RobTable.setLastRobForRegisterTable( robID, i, false );
 					}
 				}
@@ -137,7 +129,7 @@ public class WriteCDB {
 		}
 		
 		// Remove row from resv stat
-		Utils.IntRegStatusTable[Execution.ReadyIntRowIndex] = null;
+		Utils.IntReserveStation[Execution.ReadyIntRowIndex] = null;
 	}
 
 	public static void flushOnFalsePredicition(	byte opcode, boolean actuallyTaken,
@@ -145,10 +137,10 @@ public class WriteCDB {
 		
 		//Remove related rows from different reservation stations and update register table.
 		int temp = Utils.RobTable.Increment(robID);
-		while (temp!=Utils.RobTable.head) {
-			deleteRobFromResvStat( opcode, robID);
-			updateRegisterTable( opcode, robID);
-			Utils.RobTable.Increment(temp);
+		while (temp!=Utils.RobTable.tail) {
+			deleteRobFromResvStat( Utils.RobTable.queue[temp].GetOpcode(), temp);
+			updateRegisterTable(  Utils.RobTable.queue[temp].GetOpcode(), temp);
+			temp = Utils.RobTable.Increment(temp);
 		}
 		
 		// Flush ROB table after the current ROB id ( untill tail )
@@ -267,13 +259,13 @@ public class WriteCDB {
 	
 	private static void writeCDB_St()
 	{
-		RobRow robRow = Utils.RobTable.queue[Execution.ReadyLdRow.ROB];
+		RobRow robRow = Utils.RobTable.queue[Execution.ReadyStRow.ROB];
 		// Notify Rob
-		robRow.Destination = Execution.AluStResult;
+		robRow.Destination = Execution.StResult;
 		robRow.Ready = true;
 		
 		// Remove row from resv stat
-		Utils.StoreBuffer[Execution.ReadyLdRowIndex] = null;
+		Utils.StoreBuffer[Execution.ReadyStRowIndex] = null;
 	}
 	
 	public static void run()

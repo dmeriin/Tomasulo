@@ -4,12 +4,11 @@ public class RobQueue {
 	int QueueMaxSize;
 	int	 head;
 	int	 tail;
-	private int size;
 	
 	final public static int INVALID_ROB_ID = -1;
 	
 	public int Add(RobRow row){
-		if (size==QueueMaxSize)
+		if (head==tail)
 			return -1;
 		else{
 			if(head==-1){
@@ -18,14 +17,12 @@ public class RobQueue {
 			int res =tail;
 			queue[tail]=row;
 			tail = Increment(tail);
-			size++;
 			return res;
 		}
 	}
 	
 	public void Delete(int index){
 		queue[index]=null;
-		size--;
 		if (head==index)
 			head = Increment(head);
 	}
@@ -44,7 +41,6 @@ public class RobQueue {
 		this.queue=new RobRow[queueSize];
 		head=-1;
 		tail=0;
-		size=0;
 	}
 	public int Increment(int index){
 		return index < (QueueMaxSize -1) ? index+1 : 0;	
@@ -54,13 +50,10 @@ public class RobQueue {
 		return index > 0 ? index - 1 : QueueMaxSize - 1;	
 	}
 	
-	public int Size(){
-		return this.size;
-	}
 	
 	public boolean IsFull()
 	{
-		return size==QueueMaxSize;
+		return head == tail;
 	}
 
 	// Sets the last robID assoicated with "regiserID" that is set between head and robID. If not found INVALID_ROB_ID is returned.

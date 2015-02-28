@@ -95,9 +95,17 @@ public class ResvStatHandler {
 		for ( int i = 0; i < resvStation.length ; i++ )
 		{
 			FpReserveRow row = resvStation[i];  
-			if ( row.ROB == robID )
+			if ( row!=null && row.ROB == robID )
 			{
 				resvStation[i] = null;
+				if (resvStation == Utils.FpAddReserveStation)
+				{
+					Utils.FpAddCounters[i] = 0;
+				}
+				else
+				{
+					Utils.FpMulCounters[i] = 0;
+				}
 				deleted  = true;
 			}
 		}
@@ -113,9 +121,10 @@ public class ResvStatHandler {
 		for ( int i = 0; i < resvStation.length ; i++ )
 		{
 			IntegerReserveRow row = resvStation[i];  
-			if ( row.ROB == robID )
+			if ( row!=null && row.ROB == robID )
 			{
 				resvStation[i] = null;
+				Utils.AluIntCounters[i] = 0;
 				deleted  = true;
 				break;
 			}
@@ -132,9 +141,17 @@ boolean deleted = false;
 		for ( int i = 0; i < resvStation.length ; i++ )
 		{
 			MemBufferRow row = resvStation[i];  
-			if ( row.ROB == robID )
+			if ( row!=null && row.ROB == robID )
 			{
 				resvStation[i] = null;
+				if (resvStation == Utils.LoadBuffer)
+				{
+					Utils.AluLdCounters[i] = 0;
+				}
+				else
+				{
+					Utils.AluStCounters[i] = 0;
+				}
 				deleted  = true;
 				break;
 			}
