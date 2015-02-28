@@ -254,12 +254,12 @@ public class WriteCDB {
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyLdRow.ROB];
 		// Notify Rob
-		robRow.Value = Execution.AluLdResult;
+		robRow.Value = Execution.LdResult;
 		robRow.Ready = true;
 		
 		// Update reservation stations
-		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyLdRow.ROB, Execution.AluLdResult);
-		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyLdRow.ROB, Execution.AluLdResult);
+		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyLdRow.ROB, Execution.LdResult);
+		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyLdRow.ROB, Execution.LdResult);
 		
 		// Remove row from resv stat
 		Utils.LoadBuffer[Execution.ReadyLdRowIndex] = null;

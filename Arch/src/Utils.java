@@ -15,6 +15,8 @@ public class Utils {
 		public static int CycleCounter = 0;
 		public static int[] MemCounters;
 		public static int[] AluIntCounters; 
+		public static int[] AluLdCounters;
+		public static int[] AluStCounters;
 		public static int[] FpAddCounters ; 
 		public static int[] FpMulCounters ; 
 		public static RobQueue RobTable;
@@ -29,6 +31,7 @@ public class Utils {
 		public static boolean 					Halt = false ;
 		public static boolean MemInUse = false;
 		
+		
 		static public void Init(Config conf){
 
 
@@ -38,7 +41,9 @@ public class Utils {
 			LoadBuffer = new MemBufferRow[conf.MemNrLoadBuffers];
 			StoreBuffer = new MemBufferRow[conf.MemNrStoreBuffers];
 			RobTable  = new RobQueue(conf.RobEntries);
-			AluIntCounters = new int[IntReserveStation.length];
+			AluIntCounters = new int[conf.IntNrReservation];
+			AluLdCounters = new int[conf.MemNrLoadBuffers];
+			AluStCounters = new int[conf.MemNrStoreBuffers];
 			FpAddCounters = new int[conf.AddNrReservation];
 			FpMulCounters = new int[conf.MulNrReservation];
 			MemCounters = new int[conf.MemNrLoadBuffers];
