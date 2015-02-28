@@ -8,19 +8,26 @@ public class Commit {
 	public static boolean run(){
 		RobQueue ROB = Utils.RobTable;
 		RobRow head = ROB.queue[ROB.head];
+		TraceRecord record = Trace.GetRecord(head.ID);
+		
+		//check if the head of the rob is insert in this cycle if true then don't commit the head this cycle.
+		if(headInsertThisCycle(head,record)){
+			Utils.MemInUse = false;
+			return true;
+		}
 		if(head.Ready){
 			byte op = head.GetOpcode();
 			if (op != OpCodes.ST_OPCODE)
 			{
 				switch (op) {
 				
-				case OpCodes.LD_OPCODE://maybe different case how to write the float value ? 
+				case OpCodes.LD_OPCODE:
 				case OpCodes.ADD_S_OPCODE:
 				case OpCodes.SUB_S_OPCODE:
 				case OpCodes.MULT_S_OPCODE:
 					Utils.FpStatusTable[head.Destination].Value=(float) head.Value;
 					if(Utils.FpStatusTable[head.Destination].Rob == ROB.head)
-						Utils.FpStatusTable[head.Destination].Rob = (short)-1;
+						Utils.FpStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
 					break;
 				case OpCodes.ADD_OPCODE:
 				case OpCodes.SUB_OPCODE:
@@ -28,7 +35,7 @@ public class Commit {
 				case OpCodes.SUBI_OPCODE:
 					Utils.IntRegStatusTable[head.Destination].Value = (int) head.Value;
 					if(Utils.IntRegStatusTable[head.Destination].Rob == ROB.head)
-						Utils.IntRegStatusTable[head.Destination].Rob = (short) -1;
+						Utils.IntRegStatusTable[head.Destination].Rob = RobQueue.INVALID_ROB_ID;
 					break;
 				case OpCodes.JUMP_OPCODE:
 				case OpCodes.BEQ_OPCODE:
@@ -38,9 +45,11 @@ public class Commit {
 					Utils.Halt=true;
 					break;
 				default:
-						return false;
+					Utils.Halt=true;
+					ROB.Delete(ROB.head);
+					//TODO Print balagan
+					return true;
 				}
-				TraceRecord record = Trace.GetRecord(head.ID);
 				record.CycleCommit= Utils.CycleCounter;
 				ROB.Delete(ROB.head);
 			}
@@ -51,17 +60,16 @@ public class Commit {
 					CommitSTCounter--;
 					if(CommitSTCounter==0)
 					{
-						TraceRecord record = Trace.GetRecord(head.ID);
-						record.CycleCommit= Utils.CycleCounter;
 						duringSTCommit = false;
-						Utils.MainMem[Utils.AddressToRowNum(head.Destination)] = (int) head.Value;
-						ROB.Delete(ROB.head);
+						Utils.MainMem[Utils.AddressToRowNum(head.Destination)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
 					}
 				}
 				else
 				{
 					if(Utils.MemInUse == false)
 					{
+						record.CycleCommit= Utils.CycleCounter;
+						ROB.Delete(ROB.head);
 						CommitSTCounter = Utils.ConfigParams.MemDelay-1;
 						duringSTCommit = true;
 					}
@@ -71,5 +79,26 @@ public class Commit {
 		// this is the last step in this cycle so we set the MemInUse to false for next cycle.
 		Utils.MemInUse = false;
 		return true;
+	}
+
+
+	private static boolean headInsertThisCycle(RobRow head, TraceRecord record) {
+		// TODO Auto-generated method stub
+		switch(head.GetOpcode()){
+		case OpCodes.JUMP_OPCODE :
+		case OpCodes.HALT_OPCODE :
+		case OpCodes.NOT_SUPPORTED :
+			if(record.CycleIssued == Utils.CycleCounter)
+				return true;
+			return false;
+		case OpCodes.ST_OPCODE :
+		case OpCodes.BEQ_OPCODE :
+		case OpCodes.BNE_OPCODE :
+			return false;
+		default :
+			if(record.WriteCdb==Utils.CycleCounter)
+				return true;
+			return false;
+		}
 	}
 }
