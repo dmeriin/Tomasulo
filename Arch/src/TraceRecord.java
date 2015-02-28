@@ -7,6 +7,8 @@ public class TraceRecord {
 	public int WriteCdb ;
 	public int CycleCommit ;
 	
+	public int CycleFetch; // Doesn't enter to logged trace.
+	
 	public TraceRecord(int id, int Instruction ){
 		WriteCdb = -1;
 		this.ID = id;

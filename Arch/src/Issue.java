@@ -1,3 +1,5 @@
+import com.sun.xml.internal.ws.org.objectweb.asm.Opcodes;
+
 
 class DecodedInstruction
 {
@@ -45,46 +47,79 @@ public class Issue {
 			InstructionContainer headInst = Utils.InstructionQueue.peek();
 			if ( headInst != null )
 			{
-			
-				DecodedInstruction decodedInst = decode ( headInst.Instruction );
+				// make sure head instruction wasn't fetched in the same cycle. 
+				 boolean isInstructionReady = Trace.GetRecord(headInst.ID).CycleFetch != Utils.CycleCounter;
 				
-				
-				switch (decodedInst.Opcode)
-				{
-					case OpCodes.ADD_S_OPCODE:
-					case OpCodes.SUB_S_OPCODE:
-					case OpCodes.MULT_S_OPCODE:
-					issueFloat(headInst, decodedInst);
-						break;
+				 if ( isInstructionReady )
+				 {				 
+					DecodedInstruction decodedInst = decode ( headInst.Instruction );
 					
-					case OpCodes.ADDI_OPCODE:
-					case OpCodes.SUBI_OPCODE:
-						// true - stands for immediate operations  
-						issueInt(headInst, decodedInst,true);
-						break;
+					switch (decodedInst.Opcode)
+					{
+						case OpCodes.ADD_S_OPCODE:
+						case OpCodes.SUB_S_OPCODE:
+						case OpCodes.MULT_S_OPCODE:
+						issueFloat(headInst, decodedInst);
+							break;
 						
-					case OpCodes.ADD_OPCODE:
-					case OpCodes.SUB_OPCODE:
-					case OpCodes.BEQ_OPCODE:
-					case OpCodes.BNE_OPCODE:
-						// false - stands for non immediate operations 
-						issueInt(headInst, decodedInst,false);
-						break;	
-						
-					case OpCodes.LD_OPCODE:
-					case OpCodes.ST_OPCODE:
-						issueMem(headInst, decodedInst);
-						break;
-						
-					case OpCodes.JUMP_OPCODE:
-					case OpCodes.HALT_OPCODE:
-					case OpCodes.NOT_SUPPORTED:
-						issueNoRevStat(headInst, decodedInst);
-						break;
-						
-				}
+						case OpCodes.ADDI_OPCODE:
+						case OpCodes.SUBI_OPCODE:
+							// true - stands for immediate operations  
+							issueInt(headInst, decodedInst,true);
+							break;
+							
+						case OpCodes.ADD_OPCODE:
+						case OpCodes.SUB_OPCODE:
+						case OpCodes.BEQ_OPCODE:
+						case OpCodes.BNE_OPCODE:
+							// false - stands for non immediate operations 
+							issueInt(headInst, decodedInst,false);
+							break;	
+							
+						case OpCodes.LD_OPCODE:
+						case OpCodes.ST_OPCODE:
+							issueMem(headInst, decodedInst);
+							break;
+							
+						case OpCodes.JUMP_OPCODE:
+							// for jump ops, if it's the first time then there was a misprediction form the BTB.
+							// Therefore, flush instruction queue. 
+							handleFirstTimeJump( headInst, decodedInst );
+							
+						case OpCodes.HALT_OPCODE:
+						case OpCodes.NOT_SUPPORTED:
+							issueNoRevStat(headInst, decodedInst);
+							break;
+							
+					}
+				 }
 			}
 		}
+	}
+	
+	
+	static void handleFirstTimeJump( InstructionContainer headInst, DecodedInstruction decodedInst ) {
+		
+		// if jump is not taken, it means it didn't appear in the BTB, there for instruction queue must be flush and BTB needs to be updated.
+		if ( !headInst.Taken )
+		{
+			// Flush instruction queue
+			Utils.InstructionQueue.clear();
+			
+			// If BTB is at its max capacity, remove an item from the list.
+			if (Utils.BTB.size() >= 16)
+			{
+				Integer keyToRemove = (Integer) Utils.BTB.keySet().toArray()[0];
+				Utils.BTB.remove(keyToRemove);
+			}
+			
+			// add row to the btb.
+			Utils.BTB.put( headInst.PC, headInst.PC + decodedInst.Imm );
+			
+			Utils.PC =  headInst.PC + decodedInst.Imm;
+		}
+		
+		
 	}
 
 	private static void issueNoRevStat(InstructionContainer headInst,
@@ -111,7 +146,18 @@ public class Issue {
 	
 	private static void issueMem(InstructionContainer headInst, DecodedInstruction decodedInst )
 	{
-		if ( !ResvStatHandler.IsResvStatFull_Int() )
+		MemBufferRow[] memBuffer ;
+		
+		if ( decodedInst.Opcode == OpCodes.LD_OPCODE )
+		{
+			memBuffer = Utils.LoadBuffer;
+		}
+		else // decodedInst.Opcode == OpCodes.ST_OPCODE
+		{
+			memBuffer = Utils.StoreBuffer;
+		}
+		
+		if ( !ResvStatHandler.IsResvStatFull(memBuffer) )
 		{ 	
 			int robID;
 		
@@ -119,13 +165,10 @@ public class Issue {
 			Utils.InstructionQueue.pop();
 
 			IntRegStatus intRegStatus0 =  Utils.IntRegStatusTable[decodedInst.Src0];			
-			IntegerReserveRow intReserveRow = new IntegerReserveRow(decodedInst.Opcode, headInst.ID, headInst.PC, headInst.Taken );
+			MemBufferRow memBuffRow = new MemBufferRow( headInst.ID );
 	
-			fillIntReserveRow_Imm(intRegStatus0, decodedInst.Imm, intReserveRow );
+			fillMemBufferRow(intRegStatus0, decodedInst.Imm, memBuffRow );
 			
-			// Add row to int reservation station
-			ResvStatHandler.AddRowToResvStat_Int( intReserveRow );
-				
 			// Add new Rob raw
 			if ( decodedInst.Opcode == OpCodes.LD_OPCODE )
 			{
@@ -137,10 +180,10 @@ public class Issue {
 				robID = Utils.RobTable.Add(new RobRow(decodedInst.Opcode, headInst.ID, -1, decodedInst.Src1, false));
 			}
 			
-			intReserveRow.ROB = robID; 
+			memBuffRow.ROB = robID; 
 			
-			// Add row to int reservation station
-			ResvStatHandler.AddRowToResvStat_Int( intReserveRow );
+			// Add row to buffer station
+			ResvStatHandler.AddRowToResvStat( memBuffer, memBuffRow );
 			
 			if ( decodedInst.Opcode == OpCodes.LD_OPCODE )
 			{
@@ -150,6 +193,24 @@ public class Issue {
 				
 			
 		}
+	}
+
+	private static void fillMemBufferRow(IntRegStatus intRegStatus0, short imm,
+			MemBufferRow memBuffRow) {
+		
+		if ( intRegStatus0.Rob == RobQueue.INVALID_ROB_ID )
+		{
+			memBuffRow.Vj = intRegStatus0.Value;
+			memBuffRow.Qj = -1;
+		}
+		else
+		{
+			memBuffRow.Vj = 0;
+			memBuffRow.Qj = intRegStatus0.Rob;
+		}
+		
+		memBuffRow.Vk = imm;
+		
 	}
 
 	private static void issueInt(InstructionContainer headInst, DecodedInstruction decodedInst, boolean isImmediate) 
@@ -205,7 +266,7 @@ public class Issue {
 			if ( intRegStatus0.Rob == RobQueue.INVALID_ROB_ID )
 			{
 				intReserveRow.Vj = intRegStatus0.Value;
-				intReserveRow.Qj = 0;
+				intReserveRow.Qj = -1;
 			}
 			else
 			{
@@ -216,7 +277,7 @@ public class Issue {
 			if ( intRegStatus1.Rob == RobQueue.INVALID_ROB_ID )
 			{
 				intReserveRow.Vk = intRegStatus1.Value;
-				intReserveRow.Qk = 0;
+				intReserveRow.Qk = -1;
 			}
 			else
 			{
@@ -233,7 +294,7 @@ public class Issue {
 		if ( intRegStatus0.Rob == RobQueue.INVALID_ROB_ID )
 		{
 			intReserveRow.Vj = intRegStatus0.Value;
-			intReserveRow.Qj = 0;
+			intReserveRow.Qj = -1;
 		}
 		else
 		{
@@ -243,7 +304,7 @@ public class Issue {
 		
 		//Vk
 		intReserveRow.Vk = imm;
-		intReserveRow.Qk = 0;
+		intReserveRow.Qk = -1;
 	}
 
 	private static void issueFloat(InstructionContainer headInst, DecodedInstruction decodedInst) {
@@ -294,7 +355,7 @@ public class Issue {
 		if ( fpRegStatus0.Rob == RobQueue.INVALID_ROB_ID )
 		{
 			fpReserveRow.Vj = fpRegStatus0.Value;
-			fpReserveRow.Qj = 0;
+			fpReserveRow.Qj = -1;
 		}
 		else
 		{
@@ -307,7 +368,7 @@ public class Issue {
 		if ( fpRegStatus1.Rob == RobQueue.INVALID_ROB_ID )
 		{
 			fpReserveRow.Vk = fpRegStatus1.Value;
-			fpReserveRow.Qk = 0;
+			fpReserveRow.Qk = -1;
 		}
 		else
 		{

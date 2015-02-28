@@ -78,27 +78,31 @@ public class RobQueue {
 		while (!passedHead)
 		{
 			RobRow row = queue[robToCheck];
-			// If Destination register is same as given regiser id and the operation is float andn the target regiser is float , change the rob id assoicated with that register.
-			if ( 	row.Destination == registerID &&
-					isFloat &&
-					OpCodes.isOpSetToFloat(row.GetOpcode()) )
-			{
-				Utils.FpStatusTable[registerID].Rob = robToCheck;
-				break;
-			}
-			// If Destination register is same as given regiser id and the operation is float andn the target regiser is float , change the rob id assoicated with that register.
-			else if (	row.Destination == registerID &&
-						!isFloat &&
-						OpCodes.isOpSetToInt(row.GetOpcode()) )
-			{
-				Utils.IntRegStatusTable[registerID].Rob = robToCheck;
-				break;
-			}
 			
-			robToCheck = Decrement(robToCheck);
-			if (robToCheck == head)
+			if ( row != null )
 			{
-				passedHead = true;
+				// If Destination register is same as given regiser id and the operation is float andn the target regiser is float , change the rob id assoicated with that register.
+				if ( 	row.Destination == registerID &&
+						isFloat &&
+						OpCodes.isOpSetToFloat(row.GetOpcode()) )
+				{
+					Utils.FpStatusTable[registerID].Rob = robToCheck;
+					break;
+				}
+				// If Destination register is same as given regiser id and the operation is float andn the target regiser is float , change the rob id assoicated with that register.
+				else if (	row.Destination == registerID &&
+							!isFloat &&
+							OpCodes.isOpSetToInt(row.GetOpcode()) )
+				{
+					Utils.IntRegStatusTable[registerID].Rob = robToCheck;
+					break;
+				}
+				
+				robToCheck = Decrement(robToCheck);
+				if (robToCheck == head)
+				{
+					passedHead = true;
+				}
 			}
 		}
 		

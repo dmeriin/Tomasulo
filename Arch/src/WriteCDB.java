@@ -18,13 +18,13 @@ public class WriteCDB {
 				if (row.Qj == Execution.ReadyIntRow.ROB )
 				{
 					row.Vj = Execution.AluIntResult;
-					row.Qj = 0;
+					row.Qj = -1;
 				}
 				
 				if (row.Qk == Execution.ReadyIntRow.ROB  )
 				{
 					row.Vk = Execution.AluIntResult;
-					row.Qk = 0;
+					row.Qk = -1;
 				}
 			}
 			
@@ -32,41 +32,6 @@ public class WriteCDB {
 		
 		// Remove row from resv stat
 		Utils.IntRegStatusTable[Execution.ReadyIntRowIndex] = null;
-	}
-	
-	private static void writeCDB_Int_AddressCalc( IntegerReserveRow row, RobRow robRow, int rowIndex )
-	{
-
-		Object[] memBuffer ;
-		
-		if ( row.GetOpcode() == OpCodes.ST_OPCODE )
-		{
-			memBuffer = Utils.StoreBuffer;
-		}
-		else
-		{
-			memBuffer = Utils.LoadBuffer;
-		}
-		
-		// if buffer is empty don't do anything. Next cycles will try to move the row from int resv stat to the associated mem buffer.
-		if (!ResvStatHandler.IsResvStatFull(memBuffer))
-		{
-			
-			// Notify Rob only for store.
-			// Store is ready when address is ready, since it is performed only on commit and it reads the register to save from register table anyway.
-			if ( row.GetOpcode() == OpCodes.ST_OPCODE )
-			{
-				robRow.Ready = true;
-			}
-			
-			// add to buffer
-			MemBufferRow memRow = new MemBufferRow(row.ID, row.ROB, row.Address);
-			ResvStatHandler.AddRowToResvStat(memBuffer, memRow);
-			
-			// Remove row from resv stat
-			Utils.IntRegStatusTable[rowIndex] = null;
-		}
-		
 	}
 	
 	private static void deleteRobFromResvStat ( byte opcode, int robID )
@@ -163,45 +128,55 @@ public class WriteCDB {
 		}
 		else // predication was wrong
 		{
-			//Remove related rows from different reservation stations and update register table.
-			int temp = Utils.RobTable.Increment(Execution.ReadyIntRow.ROB);
-			while (temp!=Utils.RobTable.head) {
-				deleteRobFromResvStat( opcode, Execution.ReadyIntRow.ROB);
-				updateRegisterTable( opcode, Execution.ReadyIntRow.ROB);
-				Utils.RobTable.Increment(temp);
-			}
+			//Flush of all rows between current row to head of rob is needed.
+			flushOnFalsePredicition(opcode, actuallyTaken, predicatedTaken, 
+									Execution.ReadyIntRow.ROB, Execution.ReadyIntRow.PC, Execution.AluIntResult );
 			
-			// Flush ROB table after the current ROB id ( untill tail )
-			Utils.RobTable.FlushAfter(Execution.ReadyIntRow.ROB);
-			
-			// Flust instruction queue
-			Utils.InstructionQueue.clear();
-			
-			// Branch was not taken but predicated to be taken
-			if (( !actuallyTaken && predicatedTaken ) )
-			{
-				// delete row from btb.
-				Utils.BTB.remove(Execution.ReadyIntRow.PC);				
-			}
-			
-			// Branch was taken but predicated not to be taken
-			if (( actuallyTaken && !predicatedTaken ) )
-			{
-				// If BTB is at its max capacity, remove an item from the list.
-				if (Utils.BTB.size() >= 16)
-				{
-					Integer keyToRemove = (Integer) Utils.BTB.keySet().toArray()[0];
-					Utils.BTB.remove(keyToRemove);
-				}
-				
-				// add row to the btb.
-				Utils.BTB.put(Execution.ReadyIntRow.PC, Execution.AluIntResult);
-			}
-
+			// Update pc
+			Utils.PC = Execution.AluIntResult;
 		}
 		
 		// Remove row from resv stat
 		Utils.IntRegStatusTable[Execution.ReadyIntRowIndex] = null;
+	}
+
+	public static void flushOnFalsePredicition(	byte opcode, boolean actuallyTaken,
+												boolean predicatedTaken, int robID, int pc, int address) {
+		
+		//Remove related rows from different reservation stations and update register table.
+		int temp = Utils.RobTable.Increment(robID);
+		while (temp!=Utils.RobTable.head) {
+			deleteRobFromResvStat( opcode, robID);
+			updateRegisterTable( opcode, robID);
+			Utils.RobTable.Increment(temp);
+		}
+		
+		// Flush ROB table after the current ROB id ( untill tail )
+		Utils.RobTable.FlushAfter(robID);
+		
+		// Flust instruction queue
+		Utils.InstructionQueue.clear();
+		
+		// Branch was not taken but predicated to be taken
+		if (( !actuallyTaken && predicatedTaken ) )
+		{
+			// delete row from btb.
+			Utils.BTB.remove(pc);				
+		}
+		
+		// Branch was taken but predicated not to be taken
+		if (( actuallyTaken && !predicatedTaken ) )
+		{
+			// If BTB is at its max capacity, remove an item from the list.
+			if (Utils.BTB.size() >= 16)
+			{
+				Integer keyToRemove = (Integer) Utils.BTB.keySet().toArray()[0];
+				Utils.BTB.remove(keyToRemove);
+			}
+			
+			// add row to the btb.
+			Utils.BTB.put(pc, address);
+		}
 	}
 
 	private static void writeCDB_Int()
@@ -215,10 +190,6 @@ public class WriteCDB {
 			case OpCodes.BNE_OPCODE:
 				writeCDB_Branch( opcode, robRow );
 				break;
-			case OpCodes.LD_OPCODE:
-			case OpCodes.ST_OPCODE:
-				writeCDB_Int_AddressCalc( Execution.ReadyIntRow, robRow, Execution.ReadyIntRowIndex );
-				 break;
 			default: // alu ops
 				writeCDB_Int_ALU( robRow );
 				break;
@@ -251,13 +222,13 @@ public class WriteCDB {
 				if (row.Qj == robID )
 				{
 					row.Vj = value;
-					row.Qj = 0;
+					row.Qj = -1;
 				}
 				
 				if (row.Qk == robID )
 				{
 					row.Vk = value;
-					row.Qk = 0;
+					row.Qk = -1;
 				}
 			}
 			
@@ -294,6 +265,17 @@ public class WriteCDB {
 		Utils.LoadBuffer[Execution.ReadyLdRowIndex] = null;
 	}
 	
+	private static void writeCDB_St()
+	{
+		RobRow robRow = Utils.RobTable.queue[Execution.ReadyLdRow.ROB];
+		// Notify Rob
+		robRow.Destination = Execution.AluStResult;
+		robRow.Ready = true;
+		
+		// Remove row from resv stat
+		Utils.StoreBuffer[Execution.ReadyLdRowIndex] = null;
+	}
+	
 	public static void run()
 	{
 		// if row  is different than null, it means a row has finished. 
@@ -311,21 +293,6 @@ public class WriteCDB {
 				Trace.GetRecord(Execution.ReadyIntRow.ID).WriteCdb = Utils.CycleCounter;
 			}
 			Execution.ReadyIntRow = null;
-		}
-		// If no new row is ready, check if there's a mem row waiting to be moved to buffer
-		else
-		{
-			for ( int i = 0 ; i < Utils.IntReserveStation.length ; i++)
-			{
-				IntegerReserveRow row = Utils.IntReserveStation[i];
-				// If there's a row with busy == false it means that last time the row was ready it couldn't move on to load/store buffer.
-				if (row != null && row.Busy == false )
-				{
-					writeCDB_Int_AddressCalc( row, Utils.RobTable.queue[row.ROB], i);
-					Trace.GetRecord(row.ID).WriteCdb = Utils.CycleCounter;
-					break;
-				}
-			}
 		}
 		
 		if ( Execution.ReadyFpAddRow != null )
@@ -350,6 +317,13 @@ public class WriteCDB {
 			
 			Trace.GetRecord(Execution.ReadyLdRow.ID).WriteCdb = Utils.CycleCounter;
 			Execution.ReadyLdRow = null;
+		}
+		
+		if ( Execution.ReadyStRow != null )
+		{
+			writeCDB_St();
+			
+			Execution.ReadyStRow = null;
 		}
 		
 	}

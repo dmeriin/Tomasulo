@@ -1,4 +1,3 @@
-
 public class Fetch {
 
 	public static boolean run(){
@@ -9,19 +8,19 @@ public class Fetch {
 		}
 		int instruction = Utils.MainMem[Utils.AddressToRowNum(Utils.PC)];
 		int id = Trace.AddRecord(instruction);
-		boolean isBranchTaken = false;
+		Trace.GetRecord(id).CycleFetch = Utils.CycleCounter;
+		
 		Integer tempPc = Utils.BTB.get(Utils.PC);
-		if(tempPc==null)
+		if(tempPc!=null)
 		{
-			Utils.PC += 4;
-		}
-		else
-		{
-			isBranchTaken = true;
+			Utils.InstructionQueue.add(new InstructionContainer(instruction, true,id, Utils.PC));
 			Utils.PC = tempPc;
 		}
-		Utils.InstructionQueue.add(new InstructionContainer(instruction, isBranchTaken,id, Utils.PC));
-		
+		else 
+		{
+			Utils.InstructionQueue.add(new InstructionContainer(instruction, false,id, Utils.PC));
+			Utils.PC +=4;
+		}	
 		return true;
 	}
 }

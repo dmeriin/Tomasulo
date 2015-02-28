@@ -94,6 +94,11 @@ public class sim {
 		{
 			Fetch.run();
 			Issue.run();
+			Execution.run();
+			WriteCDB.run();
+			Commit.run();
+
+			Utils.CycleCounter++;
 		}
 		
 	}

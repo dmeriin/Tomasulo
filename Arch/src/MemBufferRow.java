@@ -8,12 +8,10 @@ public class MemBufferRow {
 	boolean Busy;
 	int Address;
 	
-	public MemBufferRow( int id, int rob, int address )
+	public MemBufferRow( int id )
 	{
 		ID = id;
-		ROB = rob;
 		Busy = true;
-		Address = address;
 	}
 	
 }

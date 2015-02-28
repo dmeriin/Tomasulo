@@ -69,9 +69,7 @@ public class Commit {
 			}
 		}
 		// this is the last step in this cycle so we set the MemInUse to false for next cycle.
-		//and increment the CycleCounter by one.
 		Utils.MemInUse = false;
-		Utils.CycleCounter++;
 		return true;
 	}
 }
