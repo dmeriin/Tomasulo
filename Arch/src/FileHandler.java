@@ -91,13 +91,13 @@ public class FileHandler {
         }
 	}
 	
-	public static void writeRegInt ( int[] regInt, String fileName)
+	public static void writeRegInt ( IntRegStatus[] regInt, String fileName)
 	{
 		 Path file = Paths.get(fileName);
         List<String> lines = new ArrayList<String>();
         String errStr = "Exception while writing integer registers  to "  + fileName;
         for (int i=0 ; i < registerNum; i ++){
-        	lines.add(String.valueOf(regInt[i]));
+        	lines.add(String.valueOf(regInt[i].Value));
         }
  
         try {
@@ -107,13 +107,13 @@ public class FileHandler {
         	endRun(errStr);
         }	
 	}
-	public static void writeRegOut(float[] regFp, String fileName)
+	public static void writeRegOut(FpRegStatus[] regFp, String fileName)
 	{
 		 Path file = Paths.get(fileName);
         List<String> lines = new ArrayList<String>();
         String errStr = "Exception while float registers to "  + fileName;
         for (int i=0 ; i < registerNum; i ++){
-        	lines.add(String.valueOf(regFp[i]));
+        	lines.add(String.valueOf(regFp[i].Value));
         }
  
         try {

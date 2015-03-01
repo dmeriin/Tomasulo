@@ -57,12 +57,12 @@ public class RobQueue {
 	}
 
 	// Sets the last robID assoicated with "regiserID" that is set between head and robID. If not found INVALID_ROB_ID is returned.
-	public void setLastRobForRegisterTable(int robID, int registerID, boolean isFloat) 
+	public boolean setLastRobForRegisterTable(int robID, int registerID, boolean isFloat) 
 	{
 		// no need to check in case robID == head, since it has no predecessors. 
 		if (robID == head)
 		{
-			return;
+			return false;
 		}
 		
 		int robToCheck = Decrement(robID);
@@ -95,10 +95,16 @@ public class RobQueue {
 				if (robToCheck == head)
 				{
 					passedHead = true;
+					
+					// If another rob wasn't found, set rob ID back to INVALID_ROB_ID
+					
+					
 				}
 			}
 		}
 		
+		// If passedHead, then rob id wasn't set.
+		return !passedHead;
 		
 	}
 

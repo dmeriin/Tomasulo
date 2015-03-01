@@ -101,6 +101,12 @@ public class sim {
 			Utils.CycleCounter++;
 		}
 		
+		FileHandler.WriteMemOut(Utils.MainMem, "memout.txt");
+		FileHandler.writeRegInt(Utils.IntRegStatusTable, "regint.txt");
+		FileHandler.writeRegOut(Utils.FpStatusTable, "regout.txt");
+		FileHandler.WriteTraceToFile("trace.txt");
+		
+		
 	}
 
 }

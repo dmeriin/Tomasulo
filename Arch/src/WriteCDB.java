@@ -82,7 +82,12 @@ public class WriteCDB {
 					if ( Utils.FpStatusTable[i].Rob == robID )
 					{
 						// set the last rob for reigster table. Before robID, for register i, true indicated that the register is a float register.
-						Utils.RobTable.setLastRobForRegisterTable( robID, i, true );
+						boolean robChanged = Utils.RobTable.setLastRobForRegisterTable( robID, i, true );
+						
+						if (!robChanged)
+						{
+							Utils.FpStatusTable[i].Rob = RobQueue.INVALID_ROB_ID;
+						}
 					}
 				}
 				break;
@@ -97,7 +102,12 @@ public class WriteCDB {
 					if ( Utils.IntRegStatusTable[i].Rob == robID )
 					{
 						// set the last rob for reigster table. Before robID, for register i, false indicated that the register is an int register.
-						Utils.RobTable.setLastRobForRegisterTable( robID, i, false );
+						boolean robChanged =Utils.RobTable.setLastRobForRegisterTable( robID, i, false );
+						
+						if (!robChanged)
+						{
+							Utils.IntRegStatusTable[i].Rob = RobQueue.INVALID_ROB_ID;
+						}
 					}
 				}
 				break;	
@@ -125,7 +135,14 @@ public class WriteCDB {
 									Execution.ReadyIntRow.ROB, Execution.ReadyIntRow.PC, Execution.AluIntResult );
 			
 			// Update pc
-			Utils.PC = Execution.AluIntResult;
+			if ( actuallyTaken )
+			{
+				Utils.PC = Execution.AluIntResult;
+			}
+			else
+			{
+				Utils.PC = Execution.ReadyIntRow.PC + 4;
+			}
 		}
 		
 		// Remove row from resv stat

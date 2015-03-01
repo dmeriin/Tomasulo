@@ -65,7 +65,7 @@ public class Commit {
 							if(CommitSTCounter==0)
 							{
 								duringSTCommit = false;
-								Utils.MainMem[Utils.AddressToRowNum(head.Destination)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
+								Utils.MainMem[Utils.AddressToRowNum(head.Destination * 4)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
 							}
 						}
 						else

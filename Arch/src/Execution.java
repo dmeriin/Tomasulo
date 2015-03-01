@@ -376,6 +376,6 @@ public class Execution {
 		}
 	}
 	private static float LoadFromMem(int addr){
-		return Float.intBitsToFloat(Utils.MainMem[addr]);
+		return Float.intBitsToFloat(Utils.MainMem[addr * 4]);
 	}
 }
