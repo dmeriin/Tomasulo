@@ -189,7 +189,7 @@ public class Execution {
 					if(!IsIssuedThisCycle(record))
 					{
 						System.out.println("Start - FP: "+"op code: "+ Utils.FpMulReserveStation[i].GetOpcode() +" index: " + i);
-						Utils.FpMulCounters[i]=Utils.ConfigParams.AddDelay;
+						Utils.FpMulCounters[i]=Utils.ConfigParams.MulDelay;
 						record.CycleExeuctedStart = Utils.CycleCounter;
 						break;
 					}

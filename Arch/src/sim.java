@@ -101,6 +101,11 @@ public class sim {
 			Utils.CycleCounter++;
 		}
 		
+		while (Commit.hasMoreStoreToCommit())
+		{
+			Commit.handleStoreOfCommits();
+		}
+		
 		FileHandler.WriteMemOut(Utils.MainMem, "memout.txt");
 		FileHandler.writeRegInt(Utils.IntRegStatusTable, "regint.txt");
 		FileHandler.writeRegOut(Utils.FpStatusTable, "regout.txt");

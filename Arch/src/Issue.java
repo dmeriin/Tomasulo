@@ -59,7 +59,7 @@ public class Issue {
 						case OpCodes.ADD_S_OPCODE:
 						case OpCodes.SUB_S_OPCODE:
 						case OpCodes.MULT_S_OPCODE:
-						issueFloat(headInst, decodedInst);
+							issueFloat(headInst, decodedInst);
 							break;
 						
 						case OpCodes.ADDI_OPCODE:
@@ -119,6 +119,8 @@ public class Issue {
 			Utils.PC =  headInst.PC + decodedInst.Imm * 4;
 		}
 		
+		// Log issue
+		Trace.GetRecord(headInst.ID).CycleIssued = Utils.CycleCounter;
 		
 	}
 
@@ -190,6 +192,9 @@ public class Issue {
 				// Update fp registers table only for load op
 				Utils.FpStatusTable[decodedInst.Dst].Rob = robID;
 			}
+			
+			// Log issue
+			Trace.GetRecord(headInst.ID).CycleIssued = Utils.CycleCounter;
 				
 			
 		}

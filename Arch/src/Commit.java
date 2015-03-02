@@ -1,9 +1,6 @@
 
 public class Commit {
 
-	private static boolean duringSTCommit=false;
-	private static int CommitSTCounter = 0;
-	
 
 	public static boolean run(){
 		RobQueue ROB = Utils.RobTable;
@@ -59,26 +56,16 @@ public class Commit {
 					}
 					else
 					{
-						if(duringSTCommit)
+						if(Utils.MemInUse == false)
 						{
-							CommitSTCounter--;
-							if(CommitSTCounter==0)
-							{
-								duringSTCommit = false;
-								Utils.MainMem[Utils.AddressToRowNum(head.Destination * 4)] = Float.floatToIntBits(Utils.FpStatusTable[(int) head.Value].Value);
-							}
-						}
-						else
-						{
-							if(Utils.MemInUse == false)
-							{
-								record.CycleCommit= Utils.CycleCounter;
-								ROB.Delete(ROB.head);
-								CommitSTCounter = Utils.ConfigParams.MemDelay-1;
-								duringSTCommit = true;
-							}
+							record.CycleCommit= Utils.CycleCounter;
+							addToRowsToStore ( head );
+							ROB.Delete(ROB.head);
 						}
 					}
+					
+					// handle Store Of Commits in process. 
+					handleStoreOfCommits();
 				}
 			}
 		}
@@ -87,7 +74,57 @@ public class Commit {
 		return true;
 	}
 
-
+	private static RobRow[] rowsToStore = new RobRow[Utils.ConfigParams.MemNrStoreBuffers];
+	private static int[] 	CommitSTCounter = new int[Utils.ConfigParams.MemNrStoreBuffers];
+	
+	private static void addToRowsToStore( RobRow row )
+	{
+		for (int i =0 ; i < rowsToStore.length ; i++)
+		{
+			if (rowsToStore[i] == null)
+			{
+				row.Value = Float.floatToIntBits(Utils.FpStatusTable[(int) row.Value].Value);
+				rowsToStore[i] = row;
+				CommitSTCounter[i] = Utils.ConfigParams.MemDelay;
+				break;
+			}
+		}
+	}
+	
+	public static boolean hasMoreStoreToCommit()
+	{
+		boolean hasMoreStore = false;
+		for (int i =0 ; i < rowsToStore.length ; i++)
+		{
+			if (rowsToStore[i] != null)
+			{
+				hasMoreStore = true;
+			}
+		}
+		
+		return hasMoreStore;
+	}
+	
+	
+	public static void handleStoreOfCommits()
+	{
+		for (int i =0 ; i < rowsToStore.length ; i++)
+		{
+			if (rowsToStore[i] != null)
+			{
+				CommitSTCounter[i]--;
+				
+				if(CommitSTCounter[i]==0)
+				{
+					Utils.MainMem[Utils.AddressToRowNum(rowsToStore[i].Destination * 4)] = (int) rowsToStore[i].Value;
+					CommitSTCounter[i] = -1;
+					rowsToStore[i] = null;
+					
+				}
+			}
+		}
+	}
+	
 	private static boolean headInsertThisCycle(RobRow head, TraceRecord record) {
 		// TODO Auto-generated method stub
 		switch(head.GetOpcode()){

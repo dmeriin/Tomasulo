@@ -13,6 +13,10 @@ public class TraceRecord {
 		WriteCdb = -1;
 		this.ID = id;
 		this.Instruction = String.format("%08x",Instruction);
+		
+		this.CycleIssued = -1;
+		this.CycleExeuctedStart = -1;
+		this.CycleCommit = -1;
 	}
 
 }
