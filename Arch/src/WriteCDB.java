@@ -30,6 +30,30 @@ public class WriteCDB {
 			
 		}
 		
+		for ( MemBufferRow row : Utils.LoadBuffer )
+		{
+			if ( row != null )
+			{
+				if (row.Qj == Execution.ReadyIntRow.ROB )
+				{
+					row.Vj = Execution.AluIntResult;
+					row.Qj = -1;
+				}
+			}
+		}
+		
+		for ( MemBufferRow row : Utils.StoreBuffer )
+		{
+			if ( row != null )
+			{
+				if (row.Qj == Execution.ReadyIntRow.ROB )
+				{
+					row.Vj = Execution.AluIntResult;
+					row.Qj = -1;
+				}
+			}
+		}
+		
 		// Remove row from resv stat
 		Utils.IntReserveStation[Execution.ReadyIntRowIndex] = null;
 	}
@@ -280,9 +304,6 @@ public class WriteCDB {
 		// Notify Rob
 		robRow.Destination = Execution.StResult;
 		robRow.Ready = true;
-		
-		// Remove row from resv stat
-		Utils.StoreBuffer[Execution.ReadyStRowIndex] = null;
 	}
 	
 	public static void run()

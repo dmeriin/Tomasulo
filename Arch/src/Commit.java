@@ -48,7 +48,6 @@ public class Commit {
 						default:
 							Utils.Halt=true;
 							ROB.Delete(ROB.head);
-							//TODO Print balagan
 							return true;
 						}
 						record.CycleCommit= Utils.CycleCounter;
@@ -75,7 +74,7 @@ public class Commit {
 	}
 
 	private static RobRow[] rowsToStore = new RobRow[Utils.ConfigParams.MemNrStoreBuffers];
-	private static int[] 	CommitSTCounter = new int[Utils.ConfigParams.MemNrStoreBuffers];
+	private static int[] 	CommitSTCounter = new int[Utils.ConfigParams.MemDelay];
 	
 	private static void addToRowsToStore( RobRow row )
 	{
@@ -118,15 +117,24 @@ public class Commit {
 				{
 					Utils.MainMem[Utils.AddressToRowNum(rowsToStore[i].Destination * 4)] = (int) rowsToStore[i].Value;
 					CommitSTCounter[i] = -1;
-					rowsToStore[i] = null;
 					
+					
+					// Remove row from resv stat
+					for ( int j = 0 ; j < Utils.StoreBuffer.length ; j++)
+					{
+						if (  Utils.StoreBuffer[j] != null && Utils.StoreBuffer[j].ID == rowsToStore[i].ID )
+						{
+							Utils.StoreBuffer[j] = null;
+						}
+					}
+					
+					rowsToStore[i] = null;
 				}
 			}
 		}
 	}
 	
 	private static boolean headInsertThisCycle(RobRow head, TraceRecord record) {
-		// TODO Auto-generated method stub
 		switch(head.GetOpcode()){
 		case OpCodes.JUMP_OPCODE :
 		case OpCodes.HALT_OPCODE :

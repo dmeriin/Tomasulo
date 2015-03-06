@@ -147,6 +147,7 @@ boolean deleted = false;
 				if (resvStation == Utils.LoadBuffer)
 				{
 					Utils.AluLdCounters[i] = 0;
+					Utils.MemCounters[i] = 0;
 				}
 				else
 				{

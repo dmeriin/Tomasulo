@@ -132,13 +132,18 @@ public class FileHandler {
         // trace.ID is the next ID that a new instruction would get, therefore it's also the max threshold.
         for (int i=0 ; i < Trace.ID; i ++){
         	TraceRecord record = Trace.GetRecord(i);
-        	String tempStr = record.Instruction;
-        	tempStr += " " + record.CycleIssued;
-        	tempStr += " " + record.CycleExeuctedStart;
-        	tempStr += " " + record.WriteCdb;
-        	tempStr += " " + record.CycleCommit;
         	
-        	lines.add(tempStr);
+        	// Don't log operations that weren't issued
+        	if ( record.CycleIssued != -1 )
+        	{
+            	String tempStr = record.Instruction;
+            	tempStr += " " + record.CycleIssued;
+            	tempStr += " " + record.CycleExeuctedStart;
+            	tempStr += " " + record.WriteCdb;
+            	tempStr += " " + record.CycleCommit;
+            	
+            	lines.add(tempStr);
+        	}
         }
  
         try {

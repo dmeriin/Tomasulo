@@ -109,20 +109,24 @@ public class RobQueue {
 	}
 
 	public boolean isMemoryAliasing(int robIndex, int srcAddr) {
-		robIndex = Decrement(robIndex);
-		while(robIndex != head)
+		// No need to check if robIndex == head, since there are no operations to be committed before it.
+		if ( robIndex != head )
 		{
+			robIndex = Decrement(robIndex);
+			while(robIndex != head)
+			{
+				if(queue[robIndex].Destination == srcAddr)
+				{
+					return true;
+				}
+				robIndex = Decrement(robIndex);
+			}
 			if(queue[robIndex].Destination == srcAddr)
 			{
 				return true;
 			}
-			robIndex = Decrement(robIndex);
 		}
-		if(queue[robIndex].Destination == srcAddr)
-		{
-			return true;
-		}
-	return false;
+		return false;
 	}
 
 	

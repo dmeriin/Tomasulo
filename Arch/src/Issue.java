@@ -20,18 +20,19 @@ public class Issue {
 	final static int ImmMask = 		0x0000FFFF;
 	
 	
-
-	
-	
 	static DecodedInstruction decode( int instruction )
 	{
 		DecodedInstruction decodedInst = new DecodedInstruction();
 		decodedInst.Opcode = (byte) ( (instruction & OpcodeMask) >>> 28 );
-		// TODO: validate dst,src0,src1 according to opcode and change command to halt.
+		
+		// if op code is not familiar, set it to not supported.
+		if ( ! (decodedInst.Opcode >= OpCodes.LD_OPCODE && decodedInst.Opcode <= OpCodes.HALT_OPCODE ) )
+		{
+			decodedInst.Opcode = OpCodes.NOT_SUPPORTED;
+		}
 		decodedInst.Dst = ( instruction & DstMask ) >>> 24;
 		decodedInst.Src0 = ( instruction & Src0Mask ) >>> 20;
 		decodedInst.Src1 = ( instruction & Src1Mask ) >>> 16;
-		// TODO: MAke sure cast is correct for signed values (1100...)
 		decodedInst.Imm	=  (short) (instruction & ImmMask);
 		
 		return decodedInst;
@@ -229,7 +230,7 @@ public class Issue {
 		{
 			//safe to pop instruction from instruction queue
 			Utils.InstructionQueue.pop();
-
+			
 			IntRegStatus intRegStatus0 =  Utils.IntRegStatusTable[decodedInst.Src0];
 			IntRegStatus intRegStatus1 = null ;
 			if (!isImmediate)
