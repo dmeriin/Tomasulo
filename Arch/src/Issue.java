@@ -19,7 +19,7 @@ public class Issue {
 	final static int Src1Mask = 	0x000F0000;
 	final static int ImmMask = 		0x0000FFFF;
 	
-	
+	// Decode the given instruction. and returns a DecodedInstruction object.
 	static DecodedInstruction decode( int instruction )
 	{
 		DecodedInstruction decodedInst = new DecodedInstruction();
@@ -38,8 +38,8 @@ public class Issue {
 		return decodedInst;
 	
 	}
-	//
 	
+	// Issue an instruction from the head of the instructino queue if rob is not full and the associated reservation table is vacant. 
 	public static void run()
 	{
 		// No need to issue instruction if rob table is full or the associated reservation station is full.
@@ -98,14 +98,20 @@ public class Issue {
 		}
 	}
 	
-	
+	// Handle a jump encountered for the first time ( or issued after erased from BTB ) 
 	static void handleFirstTimeJump( InstructionContainer headInst, DecodedInstruction decodedInst ) {
 		
 		// if jump is not taken, it means it didn't appear in the BTB, there for instruction queue must be flush and BTB needs to be updated.
 		if ( !headInst.Taken )
 		{
-			// Flush instruction queue
-			Utils.InstructionQueue.clear();
+			// Flush instruction queue, except the first insturction which is the jump one.
+			
+			while ( Utils.InstructionQueue.size() != 1 )
+			{
+				Utils.InstructionQueue.removeLast();
+			}
+			
+			
 			
 			// If BTB is at its max capacity, remove an item from the list.
 			if (Utils.BTB.size() >= 16)
@@ -125,6 +131,7 @@ public class Issue {
 		
 	}
 
+	// Issue an operation that doesn't require a reservation station ( e.g. jump, halt or not supported )
 	private static void issueNoRevStat(InstructionContainer headInst,
 			DecodedInstruction decodedInst) {
 		
@@ -147,6 +154,7 @@ public class Issue {
 		
 	}
 	
+	// Issue a memory operation
 	private static void issueMem(InstructionContainer headInst, DecodedInstruction decodedInst )
 	{
 		MemBufferRow[] memBuffer ;
@@ -201,6 +209,7 @@ public class Issue {
 		}
 	}
 
+	// Fill Vj/Qj/Vk fields of the given memBuffRow
 	private static void fillMemBufferRow(IntRegStatus intRegStatus0, short imm,
 			MemBufferRow memBuffRow) {
 		
@@ -209,6 +218,7 @@ public class Issue {
 			memBuffRow.Vj = intRegStatus0.Value;
 			memBuffRow.Qj = -1;
 		}
+		// Get the value from ROB only if the value is ready
 		else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
 		{
 			memBuffRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
@@ -224,6 +234,7 @@ public class Issue {
 		
 	}
 
+	// Issue an integer operation
 	private static void issueInt(InstructionContainer headInst, DecodedInstruction decodedInst, boolean isImmediate) 
 	{
 		if ( !ResvStatHandler.IsResvStatFull_Int() )
@@ -239,6 +250,7 @@ public class Issue {
 			}
 			IntegerReserveRow intReserveRow = new IntegerReserveRow(decodedInst.Opcode, headInst.ID, headInst.PC , headInst.Taken);
 			
+			// fill different fields for imm or non immediate operations
 			if (isImmediate)
 			{
 				fillIntReserveRow_Imm(intRegStatus0, decodedInst.Imm, intReserveRow );
@@ -273,6 +285,7 @@ public class Issue {
 		}
 	}
 	
+	// Fill Vj/Qj/Vk/Qk fields of the given intReserveRow for non-immediate operations
 	private static void fillIntReserveRow_NotImm(IntRegStatus intRegStatus0,
 			IntRegStatus intRegStatus1, IntegerReserveRow intReserveRow) {
 
@@ -282,6 +295,7 @@ public class Issue {
 				intReserveRow.Vj = intRegStatus0.Value;
 				intReserveRow.Qj = -1;
 			}
+			// Get the value from ROB only if the value is ready
 			else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
 			{
 				intReserveRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
@@ -298,6 +312,7 @@ public class Issue {
 				intReserveRow.Vk = intRegStatus1.Value;
 				intReserveRow.Qk = -1;
 			}
+			// Get the value from ROB only if the value is ready
 			else if ( Utils.RobTable.queue[intRegStatus1.Rob].Ready )
 			{
 				intReserveRow.Vk = (int) Utils.RobTable.queue[intRegStatus1.Rob].Value;
@@ -311,6 +326,7 @@ public class Issue {
 		
 	}
 
+	// Fill Vj/Qj/Vk/Qk fields of the given intReserveRow for immediate operations
 	private static void fillIntReserveRow_Imm(IntRegStatus intRegStatus0,
 			short imm, IntegerReserveRow intReserveRow) {
 
@@ -320,6 +336,7 @@ public class Issue {
 			intReserveRow.Vj = intRegStatus0.Value;
 			intReserveRow.Qj = -1;
 		}
+		// Get the value from ROB only if the value is ready
 		else if ( Utils.RobTable.queue[intRegStatus0.Rob].Ready )
 		{
 			intReserveRow.Vj = (int) Utils.RobTable.queue[intRegStatus0.Rob].Value;
@@ -336,6 +353,7 @@ public class Issue {
 		intReserveRow.Qk = -1;
 	}
 
+	// Issue float operations
 	private static void issueFloat(InstructionContainer headInst, DecodedInstruction decodedInst) {
 		
 		Object[] resvStat = null;
@@ -377,6 +395,8 @@ public class Issue {
 			Trace.GetRecord(headInst.ID).CycleIssued = Utils.CycleCounter;
 		}
 	}
+	
+	// Fill Vj/Qj/Vk/Qk fields of the given fpReserveRow
 	private static void fillFpReserveRow(FpRegStatus fpRegStatus0,
 			FpRegStatus fpRegStatus1, FpReserveRow fpReserveRow) {
 
@@ -386,6 +406,7 @@ public class Issue {
 			fpReserveRow.Vj = fpRegStatus0.Value;
 			fpReserveRow.Qj = -1;
 		}
+		// Get the value from ROB only if the value is ready
 		else if ( Utils.RobTable.queue[fpRegStatus0.Rob].Ready )
 		{
 			fpReserveRow.Vj = (float) Utils.RobTable.queue[fpRegStatus0.Rob].Value;

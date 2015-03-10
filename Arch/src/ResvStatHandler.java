@@ -27,16 +27,6 @@ public class ResvStatHandler {
 		 return IsResvStatFull ( Utils.IntReserveStation, 0, Utils.ConfigParams.IntNrReservation );
 	}
 	
-	static public boolean IsResvStatFull_Ld ( )
-	{
-		 return IsResvStatFull ( Utils.IntReserveStation, Utils.ConfigParams.IntNrReservation, Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers );
-	}
-	
-	static public boolean IsResvStatFull_St ( )
-	{
-		 return IsResvStatFull ( Utils.IntReserveStation, Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers, 
-				 										Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers + Utils.ConfigParams.MemNrStoreBuffers);
-	}
 	
 	static public boolean IsResvStatFull ( Object[] resvStation )
 	{
@@ -71,22 +61,12 @@ public class ResvStatHandler {
 		 return AddRowToResvStat ( Utils.IntReserveStation, row, 0, Utils.ConfigParams.IntNrReservation );
 	}
 	
-	static public int AddRowToResvStat_Ld ( IntegerReserveRow row )
-	{
-		 return AddRowToResvStat ( Utils.IntReserveStation, row, Utils.ConfigParams.IntNrReservation, Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers );
-	}
-	
-	static public int AddRowToResvStat_St ( IntegerReserveRow row )
-	{
-		 return AddRowToResvStat ( Utils.IntReserveStation, row, 	Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers, 
-				 										Utils.ConfigParams.IntNrReservation + Utils.ConfigParams.MemNrLoadBuffers + Utils.ConfigParams.MemNrStoreBuffers);
-	}
-	
 	static public int AddRowToResvStat (Object[] resvStation, Object row )
 	{
 		 return AddRowToResvStat ( resvStation, row, 0, resvStation.length );
 	}
 	
+	// Removed a floating pointer Reservation Row from the reservation station.
 	// Returns true if removed, false otherwise.
 	static public boolean removeRowFromRestStatByRobID_Fp(FpReserveRow[] resvStation, int robID)
 	{
@@ -113,6 +93,7 @@ public class ResvStatHandler {
 		return deleted;
 	}
 	
+	// Removed a Integer Reservation Row from the reservation station.
 	// Returns true if removed, false otherwise.
 	static public boolean removeRowFromRestStatByRobID_Int(IntegerReserveRow[] resvStation, int robID)
 	{
@@ -133,10 +114,11 @@ public class ResvStatHandler {
 		return deleted;
 	}
 	
+	// Removed a memory buffer Reservation Row from the reservation station.
 	// Returns true if removed, false otherwise.
 	static public boolean removeRowFromRestStatByRobID_Mem(MemBufferRow[] resvStation, int robID)
 	{
-boolean deleted = false;
+		boolean deleted = false;
 		
 		for ( int i = 0; i < resvStation.length ; i++ )
 		{

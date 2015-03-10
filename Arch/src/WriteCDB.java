@@ -1,7 +1,7 @@
 
 public class WriteCDB {
 
-	
+	// Write on CDB for ALU integer ops. 
 	private static void writeCDB_Int_ALU( RobRow robRow )
 	{
 		
@@ -9,7 +9,8 @@ public class WriteCDB {
 		robRow.Value = Execution.AluIntResult;
 		robRow.Ready = true;
 		
-		// Update reservation stations
+		// Update all reservation stations that might be waiting for the newly calculated value.
+		// The reservation tables may be the integer reservation station or load or store buffers.
 		for ( IntegerReserveRow row :  Utils.IntReserveStation )
 		{
 			// if non empty, move the value that the operation was waiting for to VJ and Vk ( if needed ).
@@ -58,6 +59,7 @@ public class WriteCDB {
 		Utils.IntReserveStation[Execution.ReadyIntRowIndex] = null;
 	}
 	
+	// Delete row from reservation station according to it's opcode.
 	private static void deleteRobFromResvStat ( byte opcode, int robID )
 	{
 		switch (opcode)
@@ -139,6 +141,8 @@ public class WriteCDB {
 		}
 	}
 	
+	// Check if branch prediction was right. if it was right do nothing except removing the row from the reseervation station.
+	//	Otherwise, handle mispredicted branch.
 	private static void writeCDB_Branch( byte opcode, RobRow robRow )
 	{
 		
@@ -173,6 +177,7 @@ public class WriteCDB {
 		Utils.IntReserveStation[Execution.ReadyIntRowIndex] = null;
 	}
 
+	// Handles false prediction.
 	public static void flushOnFalsePredicition(	byte opcode, boolean actuallyTaken,
 												boolean predicatedTaken, int robID, int pc, int address) {
 		
@@ -187,7 +192,7 @@ public class WriteCDB {
 		// Flush ROB table after the current ROB id ( untill tail )
 		Utils.RobTable.FlushAfter(robID);
 		
-		// Flust instruction queue
+		// Flush instruction queue
 		Utils.InstructionQueue.clear();
 		
 		// Branch was not taken but predicated to be taken
@@ -212,6 +217,7 @@ public class WriteCDB {
 		}
 	}
 
+	// Write on CDB for integer ops. If the opeartion is a branch one, check if prediction was successful and handle accordingly .  
 	private static void writeCDB_Int()
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyIntRow.ROB];
@@ -229,6 +235,7 @@ public class WriteCDB {
 		}
 	}
 	
+	// Write on CDB for FP add ops.
 	private static void writeCDB_FpAdd()
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyFpAddRow.ROB];
@@ -246,6 +253,8 @@ public class WriteCDB {
 		
 	}
 
+	// Update floating point reservation station with the new value.
+	// Goes over all the row in the station. If there's a row that is waiting for the given value ( from the given rob id ), update it.
 	private static void UpdateFpResvStat( FpReserveRow[] table, int robID, float value ) {
 		for ( FpReserveRow row :  table )
 		{
@@ -268,6 +277,7 @@ public class WriteCDB {
 		}
 	}
 	
+	// Write on CDB for FP multiplications ops.
 	private static void writeCDB_FpMul()
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyFpMulRow.ROB];
@@ -283,6 +293,7 @@ public class WriteCDB {
 		Utils.FpMulReserveStation[Execution.ReadyFpMulRowIndex] = null;
 	}
 	
+	// Write on CDB for load ops
 	private static void writeCDB_Ld()
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyLdRow.ROB];
@@ -290,7 +301,7 @@ public class WriteCDB {
 		robRow.Value = Execution.LdResult;
 		robRow.Ready = true;
 		
-		// Update reservation stations
+		// Update reservation stations with the new value
 		UpdateFpResvStat(Utils.FpAddReserveStation, Execution.ReadyLdRow.ROB, Execution.LdResult);
 		UpdateFpResvStat(Utils.FpMulReserveStation, Execution.ReadyLdRow.ROB, Execution.LdResult);
 		
@@ -298,6 +309,7 @@ public class WriteCDB {
 		Utils.LoadBuffer[Execution.ReadyLdRowIndex] = null;
 	}
 	
+	// Marks store operation as ready in the ROB and update its destination .
 	private static void writeCDB_St()
 	{
 		RobRow robRow = Utils.RobTable.queue[Execution.ReadyStRow.ROB];
@@ -306,6 +318,9 @@ public class WriteCDB {
 		robRow.Ready = true;
 	}
 	
+	// Writes on CDB for all ready operations from all units.
+	// Handle also branch operations ( to see if branch was taken/not taken according to the BTB) and handles misprediction if neccessary.
+	//
 	public static void run()
 	{
 		// if row  is different than null, it means a row has finished. 
@@ -316,6 +331,7 @@ public class WriteCDB {
 			
 			byte opcode = Execution.ReadyIntRow.GetOpcode();
 			
+			// trace isn't needed for these operations in this stage
 			if ( 	opcode !=  OpCodes.BEQ_OPCODE && 
 					opcode !=  OpCodes.BNE_OPCODE &&
 					opcode !=  OpCodes.JUMP_OPCODE)
@@ -349,6 +365,7 @@ public class WriteCDB {
 			Execution.ReadyLdRow = null;
 		}
 		
+		// Just mark store operation as ready in the ROB and update its destination .
 		if ( Execution.ReadyStRow != null )
 		{
 			writeCDB_St();

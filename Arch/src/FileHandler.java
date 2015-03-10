@@ -8,6 +8,7 @@ import java.util.List;
 
 public class FileHandler {
 	
+	// Ends run and prints the error message
 	private static void endRun(String errStr){
 		System.out.println(errStr);
 		System.exit(1);
@@ -17,6 +18,7 @@ public class FileHandler {
 	private final static int memSize = 1024;
 	private final static int registerNum = 16;
 	
+	// reads the configuration from the given file.
 	public static Config ReadConfig(String cfgFile)
 	{
 		Path path = Paths.get(cfgFile);
@@ -55,6 +57,7 @@ public class FileHandler {
 		
 	}
 	
+	// Reads main memory from given path and returns a complete array representing the memory.
 	public static int[] ReadMainMem(String MemIn)
 	{
 		Path path = Paths.get(MemIn);
@@ -74,6 +77,7 @@ public class FileHandler {
 	
 	}
 	
+	// Gets the memory to write and path, dumps the memory in hex .
 	public static void WriteMemOut(int[] memOut, String fileName)
 	{
 	     Path file = Paths.get(fileName);
@@ -91,6 +95,7 @@ public class FileHandler {
         }
 	}
 	
+	// Dumps the integer register table to the file in the given path.
 	public static void writeRegInt ( IntRegStatus[] regInt, String fileName)
 	{
 		 Path file = Paths.get(fileName);
@@ -107,6 +112,8 @@ public class FileHandler {
         	endRun(errStr);
         }	
 	}
+	
+	// Dumps the float register table to the file in the given path.
 	public static void writeRegOut(FpRegStatus[] regFp, String fileName)
 	{
 		 Path file = Paths.get(fileName);
@@ -124,6 +131,7 @@ public class FileHandler {
         }	
 	}
 	
+	// Write the trace of the run to a file in the given path.
 	public static void WriteTraceToFile(String fileName)
 	{
 		 Path file = Paths.get(fileName);

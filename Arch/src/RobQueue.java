@@ -7,8 +7,9 @@ public class RobQueue {
 	
 	final public static int INVALID_ROB_ID = -1;
 	
+	// Add row to the rob queue.
 	public int Add(RobRow row){
-		if (head==tail)
+		if (IsFull())
 			return -1;
 		else{
 			if(head==-1){
@@ -21,12 +22,15 @@ public class RobQueue {
 		}
 	}
 	
+	
+	// delete the rob row from the given index
 	public void Delete(int index){
 		queue[index]=null;
 		if (head==index)
 			head = Increment(head);
 	}
 	
+	// flush all rob rows after the given index.
 	public void FlushAfter(int index){
 		tail = Increment(index); 
 		int temp = tail;
@@ -36,27 +40,31 @@ public class RobQueue {
 		}
 	}
 	
+	//ctor
 	public RobQueue( int queueSize ){
 		this.QueueMaxSize=queueSize;
 		this.queue=new RobRow[queueSize];
 		head=-1;
 		tail=0;
 	}
+	
+	// Cyclic incrementation 
 	public int Increment(int index){
 		return index < (QueueMaxSize -1) ? index+1 : 0;	
 	}
 	
+	// Cyclic decrementation
 	public int Decrement(int index){
 		return index > 0 ? index - 1 : QueueMaxSize - 1;	
 	}
 	
-	
+	// Returns true if the rob queue is full and false otherwise.
 	public boolean IsFull()
 	{
-		return head == tail;
+		return ( head != -1 && queue[head] != null && head == tail );
 	}
 
-	// Sets the last robID assoicated with "regiserID" that is set between head and robID. If not found INVALID_ROB_ID is returned.
+	// Sets the last robID associated with "regiserID" that is set between head and robID. If not found INVALID_ROB_ID is returned.
 	public boolean setLastRobForRegisterTable(int robID, int registerID, boolean isFloat) 
 	{
 		// no need to check in case robID == head, since it has no predecessors. 
@@ -108,6 +116,8 @@ public class RobQueue {
 		
 	}
 
+	// The function goes over all rob rows that represent store operations between head and the given rob index 'robIndex'
+	// Returns true if there's a memory aliasing ( if the addresses are the same ) for the given address 'srcAddr' ( before the given rob index ), false otherwise
 	public boolean isMemoryAliasing(int robIndex, int srcAddr) {
 		// No need to check if robIndex == head, since there are no operations to be committed before it.
 		if ( robIndex != head )
@@ -115,13 +125,13 @@ public class RobQueue {
 			robIndex = Decrement(robIndex);
 			while(robIndex != head)
 			{
-				if(queue[robIndex].Destination == srcAddr)
+				if(queue[robIndex].GetOpcode() == OpCodes.ST_OPCODE && queue[robIndex].Destination == srcAddr)
 				{
 					return true;
 				}
 				robIndex = Decrement(robIndex);
 			}
-			if(queue[robIndex].Destination == srcAddr)
+			if(queue[robIndex].GetOpcode() == OpCodes.ST_OPCODE && queue[robIndex].Destination == srcAddr)
 			{
 				return true;
 			}
